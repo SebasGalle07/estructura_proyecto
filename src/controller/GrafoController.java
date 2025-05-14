@@ -2,7 +2,7 @@ package controller;
 
 import model.GrafoAfinidad;
 import model.Usuario;
-import java.util.List;
+import model.ListaEnlazada;
 
 public class GrafoController {
     private GrafoAfinidad grafo;
@@ -19,11 +19,11 @@ public class GrafoController {
         grafo.conectar(u1.getId(), u2.getId());
     }
 
-    public List<Usuario> sugerirAmigos(String idUsuario) {
+    public ListaEnlazada<Usuario> sugerirAmigos(String idUsuario) {
         return grafo.sugerenciasDeAmigos(idUsuario);
     }
 
-    public List<Usuario> caminoMasCorto(String origen, String destino) {
+    public ListaEnlazada<Usuario> caminoMasCorto(String origen, String destino) {
         return grafo.caminoMasCorto(origen, destino);
     }
 
