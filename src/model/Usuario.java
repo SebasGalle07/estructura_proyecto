@@ -38,7 +38,7 @@ public class Usuario {
         historialAcciones.insertarFinal("Publicó: " + contenido.getTitulo());
     }
 
-    public void insertarFinalConexion(Usuario otro) {
+    public void agregarConexion(Usuario otro) {
         if (!conexiones.contiene(otro)) {
             conexiones.insertarFinal(otro);
             historialAcciones.insertarFinal("Conectado con: " + otro.getNombre());
