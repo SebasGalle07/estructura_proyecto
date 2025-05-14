@@ -1,34 +1,41 @@
 package controller;
 
 import model.Usuario;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import model.ListaEnlazada;
+import model.Pair;
 
 public class UsuarioController {
-    private Map<String, Usuario> usuarios;
+    private ListaEnlazada<Pair<String, Usuario>> usuarios;
 
     public UsuarioController() {
-        usuarios = new HashMap<>();
+        usuarios = new ListaEnlazada<>();
     }
 
-    public boolean registrarUsuario(String id, String nombre, List<String> intereses) {
-        if (usuarios.containsKey(id)) return false;
+    public boolean registrarUsuario(String id, String nombre, ListaEnlazada<String> intereses) {
+        if (buscarUsuario(id) != null) return false;
         Usuario nuevo = new Usuario(id, nombre, intereses);
-        usuarios.put(id, nuevo);
+        usuarios.insertarFinal(new Pair<>(id, nuevo));
         return true;
     }
 
     public Usuario buscarUsuario(String id) {
-        return usuarios.get(id);
+        for (Pair<String, Usuario> par : usuarios) {
+            if (par.getKey().equals(id)) {
+                return par.getValue();
+            }
+        }
+        return null;
     }
 
-    public List<Usuario> getTodos() {
-        return new ArrayList<>(usuarios.values());
+    public ListaEnlazada<Usuario> getTodos() {
+        ListaEnlazada<Usuario> lista = new ListaEnlazada<>();
+        for (Pair<String, Usuario> par : usuarios) {
+            lista.insertarFinal(par.getValue());
+        }
+        return lista;
     }
 
     public boolean existeUsuario(String id) {
-        return usuarios.containsKey(id);
+        return buscarUsuario(id) != null;
     }
 }
