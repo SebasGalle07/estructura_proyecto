@@ -1,11 +1,12 @@
 package model;
 
-public class NodoABB {
-    public Contenido contenido;
-    public NodoABB izq, der;
+public class NodoABB<T> {
+    public T dato;
+    public NodoABB<T> izq, der;
 
-    public NodoABB(Contenido contenido) {
-        this.contenido = contenido;
-        this.izq = this.der = null;
+    public NodoABB(T dato) {
+        this.dato = dato;
+        this.izq = null;
+        this.der = null;
     }
 }

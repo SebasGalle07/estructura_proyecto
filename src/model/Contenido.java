@@ -1,16 +1,13 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class Contenido {
+public class Contenido implements Comparable<Contenido> {
     private int id;
     private String titulo;
     private String autor;
     private String tema;
     private String tipo;
     private String enlace;
-    private List<Integer> valoraciones;
+    private ListaEnlazada<Integer> valoraciones;
 
     public Contenido(int id, String titulo, String autor, String tema, String tipo, String enlace) {
         this.id = id;
@@ -19,15 +16,27 @@ public class Contenido {
         this.tema = tema;
         this.tipo = tipo;
         this.enlace = enlace;
-        this.valoraciones = new ArrayList<>();
+        this.valoraciones = new ListaEnlazada<>();
     }
 
     public void agregarValoracion(int valor) {
-        valoraciones.add(valor);
+        valoraciones.insertarFinal(valor);
     }
 
     public double obtenerPromedio() {
-        return valoraciones.stream().mapToInt(i -> i).average().orElse(0);
+        if (valoraciones.estaVacia()) return 0;
+
+        int suma = 0;
+        int cantidad = 0;
+        NodoLista<Integer> actual = valoraciones.getCabeza();
+
+        while (actual != null) {
+            suma += actual.getDato();
+            cantidad++;
+            actual = actual.getSiguiente();
+        }
+
+        return (double) suma / cantidad;
     }
 
     public String getTitulo() {
@@ -54,7 +63,12 @@ public class Contenido {
         return id;
     }
 
-    public List<Integer> getValoraciones() {
+    public ListaEnlazada<Integer> getValoraciones() {
         return valoraciones;
+    }
+
+    @Override
+    public int compareTo(Contenido otro) {
+        return this.titulo.compareTo(otro.titulo);
     }
 }

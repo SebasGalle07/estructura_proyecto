@@ -1,28 +1,25 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Vertice {
     private Usuario usuario;
-    private List<Vertice> conexiones;
+    private ListaEnlazada<Vertice> conexiones;
 
     public Vertice(Usuario usuario) {
         this.usuario = usuario;
-        this.conexiones = new ArrayList<>();
+        this.conexiones = new ListaEnlazada<>();
     }
 
     public Usuario getUsuario() {
         return usuario;
     }
 
-    public List<Vertice> getConexiones() {
+    public ListaEnlazada<Vertice> getConexiones() {
         return conexiones;
     }
 
     public void conectar(Vertice otro) {
-        if (!conexiones.contains(otro)) {
-            conexiones.add(otro);
+        if (!conexiones.contiene(otro)) {
+            conexiones.insertarFinal(otro);
         }
     }
 }

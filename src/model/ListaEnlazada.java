@@ -18,6 +18,29 @@ public class ListaEnlazada<T> implements Iterable<T> {
         }
     }
 
+    public void insertarInicio(T dato) {
+        NodoLista<T> nuevo = new NodoLista<>(dato);
+        nuevo.siguiente = cabeza;
+        cabeza = nuevo;
+    }
+
+    public boolean contiene(T dato) {
+        NodoLista<T> actual = cabeza;
+        while (actual != null) {
+            if (actual.dato.equals(dato)) {
+                return true;
+            }
+            actual = actual.siguiente;
+        }
+        return false;
+    }
+
+    public void insertarUnico(T dato) {
+        if (!contiene(dato)) {
+            insertarFinal(dato);
+        }
+    }
+
     public NodoLista<T> getCabeza() {
         return cabeza;
     }

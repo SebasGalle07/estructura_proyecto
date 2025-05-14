@@ -1,6 +1,6 @@
 package model;
 
-public class SolicitudAyuda {
+public class SolicitudAyuda implements Comparable<SolicitudAyuda> {
     private Usuario solicitante;
     private String tema;
     private int nivelUrgencia;
@@ -21,5 +21,10 @@ public class SolicitudAyuda {
 
     public int getNivelUrgencia() {
         return nivelUrgencia;
+    }
+
+    @Override
+    public int compareTo(SolicitudAyuda otra) {
+        return Integer.compare(this.nivelUrgencia, otra.nivelUrgencia);
     }
 }

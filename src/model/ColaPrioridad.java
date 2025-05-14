@@ -1,28 +1,53 @@
 package model;
 
-import java.util.PriorityQueue;
-import java.util.Comparator;
+public class ColaPrioridad<T extends Comparable<T>> {
+    private Nodo<T> cabeza;
+    private int tamano;
 
-public class ColaPrioridad {
-    private PriorityQueue<SolicitudAyuda> cola;
+    private static class Nodo<T> {
+        T dato;
+        Nodo<T> siguiente;
+
+        Nodo(T dato) {
+            this.dato = dato;
+        }
+    }
 
     public ColaPrioridad() {
-        cola = new PriorityQueue<>(Comparator.comparingInt(SolicitudAyuda::getNivelUrgencia).reversed());
+        cabeza = null;
+        tamano = 0;
     }
 
-    public void insertar(SolicitudAyuda solicitud) {
-        cola.offer(solicitud);
+    public void insertar(T elemento) {
+        Nodo<T> nuevo = new Nodo<>(elemento);
+
+        if (cabeza == null || elemento.compareTo(cabeza.dato) > 0) {
+            nuevo.siguiente = cabeza;
+            cabeza = nuevo;
+        } else {
+            Nodo<T> actual = cabeza;
+            while (actual.siguiente != null && elemento.compareTo(actual.siguiente.dato) <= 0) {
+                actual = actual.siguiente;
+            }
+            nuevo.siguiente = actual.siguiente;
+            actual.siguiente = nuevo;
+        }
+        tamano++;
     }
 
-    public SolicitudAyuda extraer() {
-        return cola.poll();
+    public T extraer() {
+        if (cabeza == null) return null;
+        T dato = cabeza.dato;
+        cabeza = cabeza.siguiente;
+        tamano--;
+        return dato;
     }
 
     public boolean estaVacia() {
-        return cola.isEmpty();
+        return cabeza == null;
     }
 
     public int tamano() {
-        return cola.size();
+        return tamano;
     }
 }
