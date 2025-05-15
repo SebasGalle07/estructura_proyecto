@@ -2,48 +2,58 @@ package controller;
 
 import model.GrupoEstudio;
 import model.Usuario;
-import model.ListaEnlazada;
-import model.Pair;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GrupoEstudioController {
 
-    private ListaEnlazada<Pair<String, GrupoEstudio>> grupos;
+    private Map<String, GrupoEstudio> grupos;
 
     public GrupoEstudioController() {
-        this.grupos = new ListaEnlazada<>();
+        grupos = new HashMap<>();
     }
 
-    public boolean crearGrupoPorTema(ListaEnlazada<Usuario> usuarios, String tema) {
-        if (buscarGrupoPorTema(tema) != null) return false;
+    // Crea un grupo manualmente por tema y agrega usuarios
+    public boolean crearGrupoPorTema(List<Usuario> usuarios, String tema) {
+        if (grupos.containsKey(tema)) return false;
 
         GrupoEstudio grupo = new GrupoEstudio(tema);
         for (Usuario u : usuarios) {
             grupo.agregarIntegrante(u);
         }
-        grupos.insertarFinal(new Pair<>(tema, grupo));
+
+        grupos.put(tema, grupo);
         return true;
     }
 
-    public ListaEnlazada<GrupoEstudio> agruparPorInteres(ListaEnlazada<Usuario> usuarios, ListaEnlazada<String> temas) {
-        ListaEnlazada<GrupoEstudio> gruposGenerados = new ListaEnlazada<>();
+    // Agrupa automáticamente por intereses (retorna lista sin guardar en el mapa)
+    public List<GrupoEstudio> agruparPorInteres(List<Usuario> usuarios, List<String> temas) {
+        List<GrupoEstudio> gruposGenerados = new ArrayList<>();
 
         for (String tema : temas) {
-            GrupoEstudio grupo = new GrupoEstudio(tema);
-            for (Usuario u : usuarios) {
-                if (u.getIntereses().contiene(tema)) {
+            List<Usuario> miembros = usuarios.stream()
+                    .filter(u -> u.getIntereses().contiene(tema))
+                    .collect(Collectors.toList());
+
+            if (!miembros.isEmpty()) {
+                GrupoEstudio grupo = new GrupoEstudio(tema);
+                for (Usuario u : miembros) {
                     grupo.agregarIntegrante(u);
                 }
-            }
-            if (!grupo.getIntegrantes().estaVacia()) {
-                gruposGenerados.insertarFinal(grupo);
+                gruposGenerados.add(grupo);
             }
         }
 
         return gruposGenerados;
     }
 
+    // Agregar usuario a un grupo ya existente
     public boolean agregarUsuarioAGrupo(String tema, Usuario usuario) {
-        GrupoEstudio grupo = buscarGrupoPorTema(tema);
+        GrupoEstudio grupo = grupos.get(tema);
         if (grupo != null) {
             grupo.agregarIntegrante(usuario);
             return true;
@@ -51,24 +61,13 @@ public class GrupoEstudioController {
         return false;
     }
 
+    // Obtener grupo por tema
     public GrupoEstudio getGrupo(String tema) {
-        return buscarGrupoPorTema(tema);
+        return grupos.get(tema);
     }
 
-    public ListaEnlazada<GrupoEstudio> getTodosLosGrupos() {
-        ListaEnlazada<GrupoEstudio> todos = new ListaEnlazada<>();
-        for (Pair<String, GrupoEstudio> par : grupos) {
-            todos.insertarFinal(par.getValue());
-        }
-        return todos;
-    }
-
-    private GrupoEstudio buscarGrupoPorTema(String tema) {
-        for (Pair<String, GrupoEstudio> par : grupos) {
-            if (par.getKey().equalsIgnoreCase(tema)) {
-                return par.getValue();
-            }
-        }
-        return null;
+    // Obtener todos los grupos creados
+    public List<GrupoEstudio> getTodosLosGrupos() {
+        return new ArrayList<>(grupos.values());
     }
 }
