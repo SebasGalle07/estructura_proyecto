@@ -13,6 +13,10 @@ public class NodoLista<T> {
         return dato;
     }
 
+    public void setDato(T dato) {
+        this.dato = dato;
+    }
+
     public NodoLista<T> getSiguiente() {
         return siguiente;
     }

@@ -307,6 +307,7 @@ public class PanelEstudianteView extends JFrame {
         int result = JOptionPane.showConfirmDialog(this, panel, "Enviar Mensaje",
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE);
+
         if (result == JOptionPane.OK_OPTION) {
             String idDestino = txtDestino.getText().trim();
             String mensaje = txtMensaje.getText().trim();
@@ -352,6 +353,7 @@ public class PanelEstudianteView extends JFrame {
         int result = JOptionPane.showConfirmDialog(this, panel, "Buscar Ruta",
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE);
+
         if (result == JOptionPane.OK_OPTION) {
             String idDestino = txtDestino.getText().trim();
 
@@ -363,9 +365,9 @@ public class PanelEstudianteView extends JFrame {
                 return;
             }
 
-            List<Usuario> camino = grafoController.caminoMasCorto(usuario.getId(), idDestino);
+            model.ListaEnlazada<Usuario> camino = grafoController.caminoMasCorto(usuario.getId(), idDestino);
 
-            if (camino == null || camino.isEmpty()) {
+            if (camino == null || camino.estaVacia()) {
                 JOptionPane.showMessageDialog(this,
                         "No se encontró un camino hacia el usuario especificado",
                         "Ruta no encontrada",
@@ -402,7 +404,7 @@ public class PanelEstudianteView extends JFrame {
     }
 
     private void mostrarHistorial() {
-        var actual = usuario.getHistorialAcciones().getCabeza();
+        model.NodoLista<String> actual = usuario.getHistorialAcciones().getCabeza();
 
         if (actual == null) {
             JOptionPane.showMessageDialog(this,
@@ -426,11 +428,11 @@ public class PanelEstudianteView extends JFrame {
         historialPanel.setBackground(COLOR_FONDO);
 
         while (actual != null) {
-            JLabel accionLabel = new JLabel("• " + actual.dato);
+            JLabel accionLabel = new JLabel("• " + actual.getDato());
             accionLabel.setFont(FUENTE_CAMPO);
             accionLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
             historialPanel.add(accionLabel);
-            actual = actual.siguiente;
+            actual = actual.getSiguiente();
         }
 
         JScrollPane scrollPane = new JScrollPane(historialPanel);
@@ -440,6 +442,4 @@ public class PanelEstudianteView extends JFrame {
         JOptionPane.showMessageDialog(this, panel, "Historial de Actividades",
                 JOptionPane.PLAIN_MESSAGE);
     }
-
-
 }

@@ -189,6 +189,7 @@ public class PanelModeradorView extends JFrame {
         model.ListaEnlazada<Usuario> usuarios = usuarioController.getTodos();
         model.ListaEnlazada<Contenido> contenidosValorados = new model.ListaEnlazada<>();
 
+        // Recolectar contenidos con valoraciones
         for (Usuario u : usuarios) {
             for (Contenido c : u.getContenidosPublicados()) {
                 if (!c.getValoraciones().estaVacia()) {
@@ -197,7 +198,16 @@ public class PanelModeradorView extends JFrame {
             }
         }
 
-        // Ordenamiento descendente por promedio (burbuja)
+        // Validar si hay contenidos
+        if (contenidosValorados.estaVacia()) {
+            JOptionPane.showMessageDialog(this,
+                    "No hay contenidos valorados en el sistema",
+                    "Sin Contenidos Valorados",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // Ordenamiento descendente por promedio usando burbuja
         model.NodoLista<Contenido> i = contenidosValorados.getCabeza();
         while (i != null) {
             model.NodoLista<Contenido> j = i.getSiguiente();
@@ -212,14 +222,7 @@ public class PanelModeradorView extends JFrame {
             i = i.getSiguiente();
         }
 
-        if (contenidosValorados.estaVacia()) {
-            JOptionPane.showMessageDialog(this,
-                    "No hay contenidos valorados en el sistema",
-                    "Sin Contenidos Valorados",
-                    JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-
+        // Mostrar los top 5
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(COLOR_FONDO);
 
@@ -235,8 +238,9 @@ public class PanelModeradorView extends JFrame {
 
         int count = 0;
         for (Contenido c : contenidosValorados) {
+            double promedio = c.obtenerPromedio();
             JLabel contentLabel = new JLabel(String.format("• %s (Tema: %s) - Promedio: %.2f",
-                    c.getTitulo(), c.getTema(), c.obtenerPromedio()));
+                    c.getTitulo(), c.getTema(), promedio));
             contentLabel.setFont(FUENTE_CAMPO);
             contentLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
             listPanel.add(contentLabel);
@@ -252,6 +256,7 @@ public class PanelModeradorView extends JFrame {
         JOptionPane.showMessageDialog(this, panel, "Contenidos Mejor Valorados",
                 JOptionPane.PLAIN_MESSAGE);
     }
+
 
 
     private void mostrarUsuariosMasConectados() {
