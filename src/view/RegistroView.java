@@ -69,7 +69,6 @@ public class RegistroView extends JFrame {
             String nombre = txtNombre.getText().trim();
             String[] interesesArray = txtIntereses.getText().split(",");
 
-            // Validaciones básicas
             if (id.isEmpty() || nombre.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
                         "Todos los campos son obligatorios",
@@ -78,7 +77,12 @@ public class RegistroView extends JFrame {
                 return;
             }
 
-            if (AppContext.usuarioController.registrarUsuario(id, nombre, Arrays.asList(interesesArray))) {
+            model.ListaEnlazada<String> intereses = new model.ListaEnlazada<>();
+            for (String interes : interesesArray) {
+                intereses.insertarFinal(interes.trim());
+            }
+
+            if (AppContext.usuarioController.registrarUsuario(id, nombre, intereses)) {
                 JOptionPane.showMessageDialog(
                         this,
                         "Usuario registrado exitosamente.",
@@ -96,6 +100,7 @@ public class RegistroView extends JFrame {
                 );
             }
         });
+
 
         btnVolver.addActionListener(e -> {
             new MainView().setVisible(true);
