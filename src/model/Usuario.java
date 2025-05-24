@@ -64,7 +64,9 @@ public class Usuario {
 
     public void recibirMensaje(Mensaje mensaje) {
         mensajesRecibidos.insertarFinal(mensaje);
-        historialAcciones.insertarFinal("Recibió mensaje de: " + mensaje.getRemitente().getNombre());
+        historialAcciones.insertarFinal(
+    "Recibió mensaje de: " + mensaje.getRemitente().getNombre() + " - \"" + mensaje.getContenido() + "\""
+);
     }
 
     public ListaEnlazada<Mensaje> getMensajesEnviados() {

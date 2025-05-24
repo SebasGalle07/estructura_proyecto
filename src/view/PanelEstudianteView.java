@@ -334,9 +334,10 @@ public class PanelEstudianteView extends JFrame {
             destino.recibirMensaje(nuevo);
 
             JOptionPane.showMessageDialog(this,
-                    "Mensaje enviado correctamente a " + destino.getNombre(),
-                    "Mensaje Enviado",
-                    JOptionPane.INFORMATION_MESSAGE);
+            "<html>Mensaje enviado correctamente a <b>" + destino.getNombre() + "</b><br><br>" +
+            "<b>Contenido:</b><br>" + mensaje + "</html>",
+            "Mensaje Enviado",
+            JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
