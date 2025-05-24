@@ -106,7 +106,7 @@ public class LoginView extends JFrame {
         // Panel principal con BorderLayout para mejor organización
         JPanel mainPanel = new JPanel(new BorderLayout(0, 15));
         mainPanel.setBackground(STYLE.COLOR_FONDO);
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 25, 25, 25));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(5, 25, 25, 25));
 
         // Añadir los paneles principales a la ventana
         mainPanel.add(createTitlePanel(), BorderLayout.NORTH);
