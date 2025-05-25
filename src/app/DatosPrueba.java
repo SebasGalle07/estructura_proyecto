@@ -3,7 +3,7 @@ package app;
 import controller.*;
 import model.*;
 
-public class     DatosPrueba {
+public class DatosPrueba {
 
     public static void cargar(UsuarioController usuarioCtrl, ContenidoController contenidoCtrl,
                               AyudaController ayudaCtrl, GrafoController grafoCtrl,
@@ -67,5 +67,9 @@ public class     DatosPrueba {
         ayudaCtrl.solicitarAyuda(luis, "ABB", 5);
         ayudaCtrl.solicitarAyuda(ana, "Listas enlazadas", 2);
         ayudaCtrl.solicitarAyuda(santiago, "recorridos", 9);
+
+        // Crear un moderador
+        Usuario moderador = new Usuario("moderador", "admin", new ListaEnlazada<>());
+        usuarioCtrl.registrarUsuario(moderador.getId(), moderador.getNombre(), moderador.getIntereses());
     }
 }

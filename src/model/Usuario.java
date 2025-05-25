@@ -10,10 +10,10 @@ public class Usuario {
     private ListaEnlazada<Mensaje> mensajesEnviados;
     private ListaEnlazada<Mensaje> mensajesRecibidos;
 
-    public Usuario(String id, String nombre, ListaEnlazada<String> intereses) {
+    public Usuario(String id, String nombre, ListaEnlazada<String> intereses2) {
         this.id = id;
         this.nombre = nombre;
-        this.intereses = intereses;
+        this.intereses = intereses2;
         this.contenidosPublicados = new ListaEnlazada<>();
         this.conexiones = new ListaEnlazada<>();
         this.historialAcciones = new ListaEnlazada<>();
