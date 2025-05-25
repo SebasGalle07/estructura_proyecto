@@ -19,6 +19,7 @@ public class Contenido implements Comparable<Contenido> {
         this.valoraciones = new ListaEnlazada<>();
     }
 
+    
     public void agregarValoracion(int valor) {
         valoraciones.insertarFinal(valor);
     }
@@ -38,6 +39,8 @@ public class Contenido implements Comparable<Contenido> {
 
         return (double) suma / cantidad;
     }
+
+    
 
     public String getTitulo() {
         return titulo;

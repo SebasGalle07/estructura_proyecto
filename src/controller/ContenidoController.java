@@ -28,6 +28,10 @@ public class ContenidoController {
         return arbol.inOrden();
     }
 
+    public ListaEnlazada<Contenido> obtenerTodosLosContenidos() {
+        return arbol.inOrden(); 
+    }
+
     public ListaEnlazada<Contenido> buscarPorTema(String tema) {
         ListaEnlazada<Contenido> resultado = new ListaEnlazada<>();
         ListaEnlazada<Contenido> todos = arbol.inOrden();

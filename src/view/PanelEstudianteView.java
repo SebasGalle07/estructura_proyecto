@@ -8,7 +8,7 @@ import controller.UsuarioController;
 import model.Usuario;
 import model.Contenido;
 import model.Mensaje;
-
+import model.ListaEnlazada;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -56,7 +56,7 @@ public class PanelEstudianteView extends JFrame {
         lblTitulo.setForeground(COLOR_TEXTO);
         titlePanel.add(lblTitulo);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(7, 1, 0, 15));
+        JPanel buttonPanel = new JPanel(new GridLayout(9, 1, 0, 15));
         buttonPanel.setBackground(COLOR_FONDO);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
@@ -66,7 +66,9 @@ public class PanelEstudianteView extends JFrame {
         JButton btnEnviarMensaje = createStyledButton("Enviar Mensaje", COLOR_BOTON);
         JButton btnRutaCorta = createStyledButton("Ver Ruta Corta a Otro Usuario", COLOR_BOTON);
         JButton btnHistorial = createStyledButton("Ver Historial", COLOR_BOTON);
+        JButton btnValorarContenido = createStyledButton("Valorar Contenido", COLOR_BOTON);
         JButton btnSalir = createStyledButton("Salir", new Color(200, 200, 200));
+        JButton btnVerContenidos = createStyledButton("Ver Contenidos Publicados", COLOR_BOTON);
 
         btnPublicar.addActionListener(e -> publicarContenido());
         btnVerSugerencias.addActionListener(e -> mostrarSugerencias());
@@ -78,6 +80,7 @@ public class PanelEstudianteView extends JFrame {
             new MainView().setVisible(true);
             dispose();
         });
+        btnVerContenidos.addActionListener(e -> mostrarContenidos());
 
         buttonPanel.add(btnPublicar);
         buttonPanel.add(btnVerSugerencias);
@@ -85,7 +88,9 @@ public class PanelEstudianteView extends JFrame {
         buttonPanel.add(btnEnviarMensaje);
         buttonPanel.add(btnRutaCorta);
         buttonPanel.add(btnHistorial);
+        buttonPanel.add(btnValorarContenido);
         buttonPanel.add(btnSalir);
+        buttonPanel.add(btnVerContenidos);
 
         mainPanel.add(titlePanel, BorderLayout.NORTH);
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
@@ -443,4 +448,44 @@ public class PanelEstudianteView extends JFrame {
         JOptionPane.showMessageDialog(this, panel, "Historial de Actividades",
                 JOptionPane.PLAIN_MESSAGE);
     }
+
+    private void mostrarContenidos() {
+        // Obtener todos los contenidos publicados
+        ListaEnlazada<Contenido> contenidos = AppContext.contenidoController.obtenerTodosLosContenidos();
+
+        if (contenidos.estaVacia()) {
+            JOptionPane.showMessageDialog(this, "No hay contenidos publicados.",
+                    "Contenidos Vacíos", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // Crear un panel para mostrar los contenidos
+        JPanel panel = new JPanel(new BorderLayout(0, 10));
+        panel.setBackground(COLOR_FONDO);
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JTextArea textArea = new JTextArea();
+        textArea.setEditable(false);
+
+        StringBuilder sb = new StringBuilder();
+        for (Contenido contenido : contenidos) {
+            sb.append("ID: ").append(contenido.getId()).append("\n");
+            sb.append("Título: ").append(contenido.getTitulo()).append("\n");
+            sb.append("Autor: ").append(contenido.getAutor()).append("\n");
+            sb.append("Tema: ").append(contenido.getTema()).append("\n");
+            sb.append("Tipo: ").append(contenido.getTipo()).append("\n");
+            sb.append("Enlace: ").append(contenido.getEnlace()).append("\n");
+            sb.append("Promedio de Valoraciones: ").append(contenido.obtenerPromedio()).append("\n");
+            sb.append("--------------------------------------------------\n");
+        }
+
+        textArea.setText(sb.toString());
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(500, 300));
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        JOptionPane.showMessageDialog(this, panel, "Contenidos Publicados",
+                JOptionPane.PLAIN_MESSAGE);
+    }
+    
 }
