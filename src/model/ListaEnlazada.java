@@ -85,4 +85,21 @@ public class ListaEnlazada<T> implements Iterable<T> {
             }
         };
     }
+    public int contar() {
+        return tamano();
+    }
+
+    public T get(int index) {
+        NodoLista<T> actual = cabeza;
+        int contador = 0;
+        while (actual != null) {
+            if (contador == index) {
+                return actual.dato;
+            }
+            actual = actual.siguiente;
+            contador++;
+        }
+        return null;
+    }
+
 }

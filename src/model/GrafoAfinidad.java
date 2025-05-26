@@ -119,4 +119,49 @@ public class GrafoAfinidad {
     public ListaEnlazada<Pair<String, Vertice>> getVertices() {
         return vertices;
     }
+
+    // 🔵 NUEVO: Número de conexiones de un usuario
+    public int getNumeroConexiones(String id) {
+        Vertice v = buscarVertice(id);
+        if (v != null && v.getConexiones() != null) {
+            return v.getConexiones().contar();
+        }
+        return 0;
+    }
+
+    // 🔵 NUEVO: Top N usuarios con más conexiones
+    public ListaEnlazada<String> getTopUsuariosConectados(int top) {
+        ListaEnlazada<Pair<String, Integer>> conteo = new ListaEnlazada<>();
+        NodoLista<Pair<String, Vertice>> actual = vertices.getCabeza();
+
+        while (actual != null) {
+            String id = actual.getDato().getKey();
+            int num = getNumeroConexiones(id);
+            conteo.insertarFinal(new Pair<>(id, num));
+            actual = actual.getSiguiente();
+        }
+
+        // Ordenamiento burbuja descendente
+        for (int i = 0; i < conteo.contar() - 1; i++) {
+            NodoLista<Pair<String, Integer>> nodo = conteo.getCabeza();
+            for (int j = 0; j < conteo.contar() - 1 - i; j++) {
+                Pair<String, Integer> a = nodo.getDato();
+                Pair<String, Integer> b = nodo.getSiguiente().getDato();
+                if (a.getValue() < b.getValue()) {
+                    nodo.setDato(b);
+                    nodo.getSiguiente().setDato(a);
+                }
+                nodo = nodo.getSiguiente();
+            }
+        }
+
+        ListaEnlazada<String> resultado = new ListaEnlazada<>();
+        for (int i = 0; i < top && i < conteo.contar(); i++) {
+            Pair<String, Integer> par = conteo.get(i);
+            Usuario u = buscarVertice(par.getKey()).getUsuario();
+            resultado.insertarFinal(u.getNombre() + " (ID: " + u.getId() + ") - Conexiones: " + par.getValue());
+        }
+
+        return resultado;
+    }
 }

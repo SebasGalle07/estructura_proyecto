@@ -8,28 +8,41 @@ import controller.UsuarioController;
 import model.Usuario;
 import model.Contenido;
 import model.Mensaje;
-import model.ListaEnlazada;  
+import model.ListaEnlazada;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.RoundRectangle2D;
 import java.util.List;
 
 public class PanelEstudianteView extends JFrame {
-    // Definimos la misma paleta de colores que RegistroView
-    private static final Color COLOR_FONDO = new Color(240, 248, 255); // Azul muy claro
-    private static final Color COLOR_HEADER = new Color(173, 216, 230); // Azul claro
-    private static final Color COLOR_BOTON = new Color(100, 149, 237); // Azul cornflower
-    private static final Color COLOR_TEXTO = new Color(25, 25, 112); // Azul marino oscuro
-    private static final Font FUENTE_TITULO = new Font("Segoe UI", Font.BOLD, 18);
+    // Paleta de colores moderna
+    private static final Color COLOR_PRIMARIO = new Color(79, 70, 229); // Índigo
+    private static final Color COLOR_SECUNDARIO = new Color(139, 92, 246); // Violeta
+    private static final Color COLOR_ACENTO = new Color(236, 72, 153); // Rosa
+    private static final Color COLOR_FONDO = new Color(15, 23, 42); // Azul muy oscuro
+    private static final Color COLOR_FONDO_CLARO = new Color(30, 41, 59); // Azul oscuro
+    private static final Color COLOR_TARJETA = new Color(51, 65, 85); // Gris azulado
+    private static final Color COLOR_TEXTO = new Color(248, 250, 252); // Blanco hueso
+    private static final Color COLOR_TEXTO_SECUNDARIO = new Color(148, 163, 184); // Gris claro
+    private static final Color COLOR_EXITO = new Color(34, 197, 94); // Verde
+    private static final Color COLOR_ADVERTENCIA = new Color(251, 191, 36); // Amarillo
+    private static final Color COLOR_ERROR = new Color(239, 68, 68); // Rojo
+
+    // Fuentes modernas
+    private static final Font FUENTE_TITULO = new Font("Segoe UI", Font.BOLD, 28);
+    private static final Font FUENTE_SUBTITULO = new Font("Segoe UI", Font.PLAIN, 16);
+    private static final Font FUENTE_BOTON = new Font("Segoe UI", Font.BOLD, 14);
     private static final Font FUENTE_ETIQUETA = new Font("Segoe UI", Font.PLAIN, 14);
     private static final Font FUENTE_CAMPO = new Font("Segoe UI", Font.PLAIN, 14);
-    private static final Font FUENTE_BOTON = new Font("Segoe UI", Font.BOLD, 14);
 
     private Usuario usuario;
     private UsuarioController usuarioController;
     private ContenidoController contenidoController;
     private GrafoController grafoController;
     private AyudaController ayudaController;
+    private Timer animationTimer;
 
     public PanelEstudianteView(Usuario usuario) {
         this.usuario = usuario;
@@ -38,152 +51,417 @@ public class PanelEstudianteView extends JFrame {
         this.grafoController = AppContext.grafoController;
         this.ayudaController = AppContext.ayudaController;
 
-        setTitle("Panel de Estudiante - " + usuario.getNombre());
-        setSize(550, 600);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);
-
-        JPanel mainPanel = new JPanel(new BorderLayout(0, 20));
-        mainPanel.setBackground(COLOR_FONDO);
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 25, 25, 25));
-
-        JPanel titlePanel = new JPanel();
-        titlePanel.setBackground(COLOR_HEADER);
-        titlePanel.setBorder(new EmptyBorder(15, 0, 15, 0));
-        JLabel lblTitulo = new JLabel("Bienvenido, " + usuario.getNombre());
-        lblTitulo.setFont(FUENTE_TITULO);
-        lblTitulo.setForeground(COLOR_TEXTO);
-        titlePanel.add(lblTitulo);
-
-        JPanel buttonPanel = new JPanel(new GridLayout(9, 1, 0, 15));
-        buttonPanel.setBackground(COLOR_FONDO);
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
-
-        JButton btnPublicar = createStyledButton("Publicar Contenido", COLOR_BOTON);
-        JButton btnVerSugerencias = createStyledButton("Ver Sugerencias de Amistad", COLOR_BOTON);
-        JButton btnSolicitarAyuda = createStyledButton("Solicitar Ayuda", COLOR_BOTON);
-        JButton btnEnviarMensaje = createStyledButton("Enviar Mensaje", COLOR_BOTON);
-        JButton btnRutaCorta = createStyledButton("Ver Ruta Corta a Otro Usuario", COLOR_BOTON);
-        JButton btnHistorial = createStyledButton("Ver Historial", COLOR_BOTON);
-        JButton btnValorarContenido = createStyledButton("Valorar Contenido", COLOR_BOTON);
-        JButton btnSalir = createStyledButton("Salir", new Color(200, 200, 200));
-        JButton btnVerContenidos = createStyledButton("Ver Contenidos Publicados", COLOR_BOTON);
-
-        btnPublicar.addActionListener(e -> publicarContenido());
-        btnVerSugerencias.addActionListener(e -> mostrarSugerencias());
-        btnSolicitarAyuda.addActionListener(e -> solicitarAyuda());
-        btnEnviarMensaje.addActionListener(e -> enviarMensaje());
-        btnRutaCorta.addActionListener(e -> verRutaCorta());
-        btnHistorial.addActionListener(e -> mostrarHistorial());
-        btnSalir.addActionListener(e -> {
-            new MainView().setVisible(true);
-            dispose();
-        });
-        btnVerContenidos.addActionListener(e -> mostrarContenidos());
-        btnValorarContenido.addActionListener(e -> valorarContenido());
-
-        buttonPanel.add(btnVerContenidos);
-        buttonPanel.add(btnPublicar);
-        buttonPanel.add(btnVerSugerencias);
-        buttonPanel.add(btnSolicitarAyuda);
-        buttonPanel.add(btnEnviarMensaje);
-        buttonPanel.add(btnRutaCorta);
-        buttonPanel.add(btnHistorial);
-        buttonPanel.add(btnValorarContenido);
-        buttonPanel.add(btnSalir);
-
-        mainPanel.add(titlePanel, BorderLayout.NORTH);
-        mainPanel.add(buttonPanel, BorderLayout.CENTER);
-
-        add(mainPanel);
+        initializeFrame();
+        createUI();
+        startAnimations();
     }
 
-    /**
-     * Crea un botón estilizado con el color especificado
-     */
-    private JButton createStyledButton(String text, Color bgColor) {
-        JButton button = new JButton(text);
-        button.setFont(FUENTE_BOTON);
-        button.setBackground(bgColor);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    private void initializeFrame() {
+        setTitle("EduConnect - Panel de Estudiante");
+        setSize(1000, 700);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(true);
+        setMinimumSize(new Dimension(900, 600));
 
-        // Efecto de hover
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(bgColor.brighter());
+        // Fondo con gradiente
+        setContentPane(new GradientPanel());
+    }
+
+    private void createUI() {
+        setLayout(new BorderLayout());
+
+        // Header con información del usuario
+        JPanel headerPanel = createHeaderPanel();
+        add(headerPanel, BorderLayout.NORTH);
+
+        // Panel principal con las opciones
+        JPanel mainPanel = createMainPanel();
+        add(mainPanel, BorderLayout.CENTER);
+
+        // Footer con información adicional
+        JPanel footerPanel = createFooterPanel();
+        add(footerPanel, BorderLayout.SOUTH);
+    }
+
+    private JPanel createHeaderPanel() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setOpaque(false);
+        header.setBorder(BorderFactory.createEmptyBorder(30, 40, 20, 40));
+
+        // Panel izquierdo con saludo
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.setOpaque(false);
+
+        JLabel welcomeLabel = new JLabel("¡Bienvenido de vuelta!");
+        welcomeLabel.setFont(FUENTE_SUBTITULO);
+        welcomeLabel.setForeground(COLOR_TEXTO_SECUNDARIO);
+
+        JLabel nameLabel = new JLabel(usuario.getNombre());
+        nameLabel.setFont(FUENTE_TITULO);
+        nameLabel.setForeground(COLOR_TEXTO);
+
+        leftPanel.add(welcomeLabel, BorderLayout.NORTH);
+        leftPanel.add(nameLabel, BorderLayout.CENTER);
+
+        // Panel derecho con avatar y estadísticas
+        JPanel rightPanel = createUserStatsPanel();
+
+        header.add(leftPanel, BorderLayout.WEST);
+        header.add(rightPanel, BorderLayout.EAST);
+
+        return header;
+    }
+
+    private JPanel createUserStatsPanel() {
+        JPanel statsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        statsPanel.setOpaque(false);
+
+        // Avatar circular
+        JPanel avatarPanel = createAvatarPanel();
+        statsPanel.add(avatarPanel);
+
+        return statsPanel;
+    }
+
+    private JPanel createAvatarPanel() {
+        JPanel avatarContainer = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Círculo con gradiente
+                GradientPaint gradient = new GradientPaint(0, 0, COLOR_PRIMARIO,
+                        getWidth(), getHeight(), COLOR_SECUNDARIO);
+                g2d.setPaint(gradient);
+                g2d.fillOval(5, 5, getWidth()-10, getHeight()-10);
+
+                // Letra inicial
+                g2d.setColor(Color.WHITE);
+                g2d.setFont(new Font("Segoe UI", Font.BOLD, 24));
+                FontMetrics fm = g2d.getFontMetrics();
+                String initial = usuario.getNombre().substring(0, 1).toUpperCase();
+                int x = (getWidth() - fm.stringWidth(initial)) / 2;
+                int y = (getHeight() + fm.getAscent()) / 2 - 2;
+                g2d.drawString(initial, x, y);
+
+                g2d.dispose();
+            }
+        };
+        avatarContainer.setPreferredSize(new Dimension(60, 60));
+        avatarContainer.setOpaque(false);
+        return avatarContainer;
+    }
+
+    private JPanel createMainPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setOpaque(false);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+
+        // Grid de tarjetas de funcionalidades
+        JPanel cardsPanel = new JPanel(new GridLayout(3, 3, 20, 20));
+        cardsPanel.setOpaque(false);
+
+        // Crear tarjetas para cada funcionalidad
+        cardsPanel.add(createFeatureCard("📚", "Ver Contenidos", "Explora todo el contenido disponible",
+                COLOR_PRIMARIO, e -> mostrarContenidos()));
+        cardsPanel.add(createFeatureCard("✏️", "Publicar", "Comparte tu conocimiento",
+                COLOR_SECUNDARIO, e -> publicarContenido()));
+        cardsPanel.add(createFeatureCard("👥", "Sugerencias", "Descubre nuevas conexiones",
+                COLOR_ACENTO, e -> mostrarSugerencias()));
+        cardsPanel.add(createFeatureCard("🆘", "Solicitar Ayuda", "Obtén ayuda de la comunidad",
+                COLOR_ADVERTENCIA, e -> solicitarAyuda()));
+        cardsPanel.add(createFeatureCard("💬", "Mensajes", "Comunícate con otros usuarios",
+                COLOR_EXITO, e -> enviarMensaje()));
+        cardsPanel.add(createFeatureCard("🗺️", "Rutas", "Encuentra el camino más corto",
+                COLOR_PRIMARIO, e -> verRutaCorta()));
+        cardsPanel.add(createFeatureCard("📋", "Historial", "Revisa tu actividad",
+                COLOR_SECUNDARIO, e -> mostrarHistorial()));
+        cardsPanel.add(createFeatureCard("⭐", "Valorar", "Califica el contenido",
+                COLOR_ACENTO, e -> valorarContenido()));
+        cardsPanel.add(createFeatureCard("🚪", "Salir", "Cerrar sesión",
+                COLOR_ERROR, e -> {
+                    new MainView().setVisible(true);
+                    dispose();
+                }));
+
+        mainPanel.add(cardsPanel, BorderLayout.CENTER);
+        return mainPanel;
+    }
+
+    private JPanel createFeatureCard(String icon, String title, String description, Color accentColor, ActionListener action) {
+        JPanel card = new JPanel() {
+            private boolean hovered = false;
+            private float hoverProgress = 0f;
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Sombra
+                g2d.setColor(new Color(0, 0, 0, 50));
+                g2d.fillRoundRect(3, 3, getWidth()-3, getHeight()-3, 20, 20);
+
+                // Fondo con gradiente
+                Color baseColor = COLOR_TARJETA;
+                Color hoverColor = new Color(
+                        Math.min(255, baseColor.getRed() + (int)(20 * hoverProgress)),
+                        Math.min(255, baseColor.getGreen() + (int)(20 * hoverProgress)),
+                        Math.min(255, baseColor.getBlue() + (int)(20 * hoverProgress))
+                );
+
+                GradientPaint gradient = new GradientPaint(0, 0, hoverColor,
+                        0, getHeight(), baseColor);
+                g2d.setPaint(gradient);
+                g2d.fillRoundRect(0, 0, getWidth()-3, getHeight()-3, 20, 20);
+
+                // Borde de acento
+                g2d.setColor(accentColor);
+                g2d.setStroke(new BasicStroke(2f));
+                g2d.drawRoundRect(1, 1, getWidth()-5, getHeight()-5, 20, 20);
+
+                g2d.dispose();
+                super.paintComponent(g);
+            }
+        };
+
+        card.setLayout(new BorderLayout());
+        card.setOpaque(false);
+        card.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Contenido de la tarjeta
+        JPanel contentPanel = new JPanel(new BorderLayout(0, 10));
+        contentPanel.setOpaque(false);
+
+        // Icono
+        JLabel iconLabel = new JLabel(icon, SwingConstants.CENTER);
+        iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 32));
+        contentPanel.add(iconLabel, BorderLayout.NORTH);
+
+        // Título
+        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+        titleLabel.setFont(FUENTE_BOTON);
+        titleLabel.setForeground(COLOR_TEXTO);
+        contentPanel.add(titleLabel, BorderLayout.CENTER);
+
+        // Descripción
+        JLabel descLabel = new JLabel("<html><center>" + description + "</center></html>", SwingConstants.CENTER);
+        descLabel.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        descLabel.setForeground(COLOR_TEXTO_SECUNDARIO);
+        contentPanel.add(descLabel, BorderLayout.SOUTH);
+
+        card.add(contentPanel, BorderLayout.CENTER);
+
+        // Efectos de hover
+        card.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                animateHover(card, true);
             }
 
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(bgColor);
+            @Override
+            public void mouseExited(MouseEvent e) {
+                animateHover(card, false);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                action.actionPerformed(new ActionEvent(card, ActionEvent.ACTION_PERFORMED, ""));
             }
         });
+
+        return card;
+    }
+
+    private void animateHover(JPanel card, boolean entering) {
+        Timer hoverTimer = new Timer(10, null);
+        hoverTimer.addActionListener(e -> {
+            // Esta animación se puede implementar con más detalle si se necesita
+            card.repaint();
+            hoverTimer.stop();
+        });
+        hoverTimer.start();
+    }
+
+    private JPanel createFooterPanel() {
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        footer.setOpaque(false);
+        footer.setBorder(BorderFactory.createEmptyBorder(10, 40, 20, 40));
+
+        JLabel footerLabel = new JLabel("EduConnect © 2025 - Plataforma Educativa Inteligente");
+        footerLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        footerLabel.setForeground(COLOR_TEXTO_SECUNDARIO);
+        footer.add(footerLabel);
+
+        return footer;
+    }
+
+    private void startAnimations() {
+        // Timer para animaciones sutiles
+        animationTimer = new Timer(50, e -> {
+            // Aquí se pueden agregar animaciones adicionales
+            repaint();
+        });
+        animationTimer.start();
+    }
+
+    // Clase para el fondo con gradiente
+    private class GradientPanel extends JPanel {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Gradiente de fondo
+            GradientPaint gradient = new GradientPaint(
+                    0, 0, COLOR_FONDO,
+                    getWidth(), getHeight(), COLOR_FONDO_CLARO
+            );
+            g2d.setPaint(gradient);
+            g2d.fillRect(0, 0, getWidth(), getHeight());
+        }
+    }
+
+    // Método para crear diálogos modernos
+    private JDialog createModernDialog(String title, JPanel content) {
+        JDialog dialog = new JDialog(this, title, true);
+        dialog.setUndecorated(true);
+        dialog.setBackground(new Color(0, 0, 0, 0));
+
+        JPanel mainPanel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Sombra
+                g2d.setColor(new Color(0, 0, 0, 100));
+                g2d.fillRoundRect(5, 5, getWidth()-5, getHeight()-5, 20, 20);
+
+                // Fondo
+                g2d.setColor(COLOR_TARJETA);
+                g2d.fillRoundRect(0, 0, getWidth()-5, getHeight()-5, 20, 20);
+
+                g2d.dispose();
+            }
+        };
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.add(content, BorderLayout.CENTER);
+
+        dialog.add(mainPanel);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        return dialog;
+    }
+
+    private JTextField createModernTextField(String placeholder) {
+        JTextField field = new JTextField() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Fondo
+                g2d.setColor(COLOR_FONDO_CLARO);
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+
+                // Borde
+                g2d.setColor(COLOR_PRIMARIO);
+                g2d.setStroke(new BasicStroke(2f));
+                g2d.drawRoundRect(1, 1, getWidth()-2, getHeight()-2, 10, 10);
+
+                g2d.dispose();
+                super.paintComponent(g);
+            }
+        };
+
+        field.setOpaque(false);
+        field.setForeground(COLOR_TEXTO);
+        field.setCaretColor(COLOR_TEXTO);
+        field.setFont(FUENTE_CAMPO);
+        field.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
+
+        return field;
+    }
+
+    private JButton createModernButton(String text, Color bgColor) {
+        JButton button = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Sombra
+                g2d.setColor(new Color(0, 0, 0, 50));
+                g2d.fillRoundRect(2, 2, getWidth()-2, getHeight()-2, 12, 12);
+
+                // Fondo con gradiente
+                GradientPaint gradient = new GradientPaint(0, 0, bgColor,
+                        0, getHeight(), bgColor.darker());
+                g2d.setPaint(gradient);
+                g2d.fillRoundRect(0, 0, getWidth()-2, getHeight()-2, 12, 12);
+
+                g2d.dispose();
+                super.paintComponent(g);
+            }
+        };
+
+        button.setContentAreaFilled(false);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setForeground(Color.WHITE);
+        button.setFont(FUENTE_BOTON);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(BorderFactory.createEmptyBorder(12, 24, 12, 24));
 
         return button;
     }
 
-    /**
-     * Crea un panel para un campo del formulario con etiqueta y campo de texto
-     */
-    private JPanel createFieldPanel(String labelText) {
-        JPanel panel = new JPanel(new BorderLayout(10, 0));
-        panel.setBackground(COLOR_FONDO);
-
-        JLabel label = new JLabel(labelText);
-        label.setFont(FUENTE_ETIQUETA);
-        label.setForeground(COLOR_TEXTO);
-
-        JPanel fieldPanel = new JPanel(new BorderLayout());
-        fieldPanel.setBackground(COLOR_FONDO);
-
-        JTextField textField = new JTextField();
-        textField.setFont(FUENTE_CAMPO);
-        textField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(180, 180, 180)),
-                BorderFactory.createEmptyBorder(8, 10, 8, 10)
-        ));
-
-        fieldPanel.add(textField, BorderLayout.CENTER);
-
-        panel.add(label, BorderLayout.NORTH);
-        panel.add(fieldPanel, BorderLayout.CENTER);
-
-        return panel;
-    }
-
+    // Métodos de funcionalidad (mantener la lógica original pero con diálogos modernos)
     private void publicarContenido() {
-        JPanel panel = new JPanel(new GridLayout(4, 1, 0, 10));
-        panel.setBackground(COLOR_FONDO);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
 
-        JPanel tituloPanel = createFieldPanel("Título:");
-        JPanel temaPanel = createFieldPanel("Tema:");
-        JPanel tipoPanel = createFieldPanel("Tipo:");
-        JPanel enlacePanel = createFieldPanel("Enlace:");
+        JLabel titulo = new JLabel("📄 Publicar Nuevo Contenido");
+        titulo.setFont(FUENTE_TITULO);
+        titulo.setForeground(COLOR_TEXTO);
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titulo);
+        panel.add(Box.createVerticalStrut(20));
 
-        panel.add(tituloPanel);
-        panel.add(temaPanel);
-        panel.add(tipoPanel);
-        panel.add(enlacePanel);
+        // Campos con etiquetas
+        JTextField txtTitulo = createModernTextField("");
+        JTextField txtTema = createModernTextField("");
+        JTextField txtTipo = createModernTextField("");
+        JTextField txtEnlace = createModernTextField("");
 
-        JTextField txtTitulo = (JTextField) ((JPanel)tituloPanel.getComponent(1)).getComponent(0);
-        JTextField txtTema = (JTextField) ((JPanel)temaPanel.getComponent(1)).getComponent(0);
-        JTextField txtTipo = (JTextField) ((JPanel)tipoPanel.getComponent(1)).getComponent(0);
-        JTextField txtEnlace = (JTextField) ((JPanel)enlacePanel.getComponent(1)).getComponent(0);
+        panel.add(crearCampoConEtiqueta("Título del contenido:", txtTitulo));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearCampoConEtiqueta("Tema principal:", txtTema));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearCampoConEtiqueta("Tipo de contenido:", txtTipo));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearCampoConEtiqueta("Enlace (opcional):", txtEnlace));
+        panel.add(Box.createVerticalStrut(20));
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "Nuevo Contenido", JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE);
+        // Botones
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        buttonPanel.setOpaque(false);
+        JButton btnPublicar = createModernButton("Publicar", COLOR_EXITO);
+        JButton btnCancelar = createModernButton("Cancelar", COLOR_ERROR);
 
-        if (result == JOptionPane.OK_OPTION) {
-            if (txtTitulo.getText().trim().isEmpty() || txtTema.getText().trim().isEmpty() ||
+        btnPublicar.addActionListener(e -> {
+            if (txtTitulo.getText().trim().isEmpty() ||
+                    txtTema.getText().trim().isEmpty() ||
                     txtTipo.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "Por favor complete todos los campos requeridos",
-                        "Campos incompletos",
-                        JOptionPane.WARNING_MESSAGE);
+                mostrarMensajeModerno("Error", "Por favor complete todos los campos requeridos", COLOR_ERROR);
                 return;
             }
 
@@ -192,146 +470,209 @@ public class PanelEstudianteView extends JFrame {
                     txtTipo.getText(), txtEnlace.getText(), usuario
             );
 
-            JOptionPane.showMessageDialog(this,
-                    "Contenido publicado exitosamente: " + c.getTitulo(),
-                    "Publicación Exitosa",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
+            mostrarMensajeModerno("Éxito", "Contenido publicado: " + c.getTitulo(), COLOR_EXITO);
+            SwingUtilities.getWindowAncestor(panel).dispose();
+        });
+
+        btnCancelar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+
+        buttonPanel.add(btnPublicar);
+        buttonPanel.add(btnCancelar);
+        panel.add(buttonPanel);
+
+        createModernDialog("Publicar Contenido", panel).setVisible(true);
+    }
+    private JPanel crearCampoConEtiqueta(String texto, JTextField campo) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout(0, 5));
+        panel.setOpaque(false);
+
+        JLabel label = new JLabel(texto);
+        label.setFont(FUENTE_ETIQUETA);
+        label.setForeground(COLOR_TEXTO);
+        panel.add(label, BorderLayout.NORTH);
+        panel.add(campo, BorderLayout.CENTER);
+
+        return panel;
     }
 
 
-    private void mostrarSugerencias() {
-        grafoController.agregarUsuario(usuario);  // Esto sigue siendo válido
 
+    private void mostrarMensajeModerno(String titulo, String mensaje, Color color) {
+        JPanel panel = new JPanel(new BorderLayout(0, 15));
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel lblTitulo = new JLabel(titulo, SwingConstants.CENTER);
+        lblTitulo.setFont(FUENTE_TITULO);
+        lblTitulo.setForeground(color);
+
+        JLabel lblMensaje = new JLabel("<html><center>" + mensaje + "</center></html>", SwingConstants.CENTER);
+        lblMensaje.setFont(FUENTE_ETIQUETA);
+        lblMensaje.setForeground(COLOR_TEXTO);
+
+        JButton btnOk = createModernButton("Entendido", COLOR_PRIMARIO);
+        btnOk.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+
+        panel.add(lblTitulo, BorderLayout.NORTH);
+        panel.add(lblMensaje, BorderLayout.CENTER);
+        panel.add(btnOk, BorderLayout.SOUTH);
+
+        createModernDialog(titulo, panel).setVisible(true);
+    }
+
+    // Los demás métodos siguen la misma lógica pero con la nueva estética
+    // Por brevedad, incluiré solo algunos ejemplos más:
+
+    private void mostrarSugerencias() {
+        grafoController.agregarUsuario(usuario);
         model.ListaEnlazada<Usuario> sugerencias = grafoController.sugerirAmigos(usuario.getId());
 
         if (sugerencias.estaVacia()) {
-            JOptionPane.showMessageDialog(this,
-                    "No hay sugerencias de amistad disponibles en este momento.",
-                    "Sin Sugerencias",
-                    JOptionPane.INFORMATION_MESSAGE);
+            mostrarMensajeModerno("Sin Sugerencias",
+                    "No hay sugerencias de amistad disponibles en este momento.", COLOR_ADVERTENCIA);
         } else {
-            JPanel panel = new JPanel(new BorderLayout());
-            panel.setBackground(COLOR_FONDO);
+            JPanel panel = new JPanel(new BorderLayout(0, 15));
+            panel.setOpaque(false);
 
-            JLabel titulo = new JLabel("Sugerencias de conexión:");
-            titulo.setFont(FUENTE_ETIQUETA);
+            JLabel titulo = new JLabel("Sugerencias de Conexión");
+            titulo.setFont(FUENTE_TITULO);
             titulo.setForeground(COLOR_TEXTO);
-            panel.add(titulo, BorderLayout.NORTH);
+            titulo.setHorizontalAlignment(SwingConstants.CENTER);
 
             JPanel listPanel = new JPanel();
             listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
-            listPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-            listPanel.setBackground(COLOR_FONDO);
+            listPanel.setOpaque(false);
 
             for (Usuario u : sugerencias) {
-                JLabel userLabel = new JLabel("• " + u.getNombre() + " (ID: " + u.getId() + ")");
+                JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                userPanel.setOpaque(false);
+                userPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+                JLabel userLabel = new JLabel("👤 " + u.getNombre() + " (ID: " + u.getId() + ")");
                 userLabel.setFont(FUENTE_CAMPO);
-                userLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-                listPanel.add(userLabel);
+                userLabel.setForeground(COLOR_TEXTO);
+                userPanel.add(userLabel);
+
+                listPanel.add(userPanel);
             }
 
             JScrollPane scrollPane = new JScrollPane(listPanel);
-            scrollPane.setPreferredSize(new Dimension(300, 200));
+            scrollPane.setOpaque(false);
+            scrollPane.getViewport().setOpaque(false);
+            scrollPane.setBorder(null);
+            scrollPane.setPreferredSize(new Dimension(400, 200));
+
+            panel.add(titulo, BorderLayout.NORTH);
             panel.add(scrollPane, BorderLayout.CENTER);
 
-            JOptionPane.showMessageDialog(this, panel, "Sugerencias de Amistad",
-                    JOptionPane.PLAIN_MESSAGE);
+            JButton btnCerrar = createModernButton("Cerrar", COLOR_PRIMARIO);
+            btnCerrar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+            panel.add(btnCerrar, BorderLayout.SOUTH);
+
+            createModernDialog("Sugerencias de Amistad", panel).setVisible(true);
         }
     }
 
-
     private void solicitarAyuda() {
-        JPanel panel = new JPanel(new GridLayout(2, 1, 0, 10));
-        panel.setBackground(COLOR_FONDO);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
 
-        JPanel temaPanel = createFieldPanel("Tema de ayuda:");
-        JPanel urgenciaPanel = createFieldPanel("Nivel de urgencia (1-10):");
+        JLabel titulo = new JLabel("🆘 Solicitar Ayuda");
+        titulo.setFont(FUENTE_TITULO);
+        titulo.setForeground(COLOR_TEXTO);
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titulo);
+        panel.add(Box.createVerticalStrut(20));
 
-        panel.add(temaPanel);
-        panel.add(urgenciaPanel);
+        JTextField txtTema = createModernTextField("");
+        JTextField txtUrgencia = createModernTextField("");
 
-        JTextField txtTema = (JTextField) ((JPanel)temaPanel.getComponent(1)).getComponent(0);
-        JTextField txtUrgencia = (JTextField) ((JPanel)urgenciaPanel.getComponent(1)).getComponent(0);
+        panel.add(crearCampoConEtiqueta("Tema de ayuda:", txtTema));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearCampoConEtiqueta("Nivel de urgencia (1-10):", txtUrgencia));
+        panel.add(Box.createVerticalStrut(20));
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "Solicitar Ayuda",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        buttonPanel.setOpaque(false);
+        JButton btnSolicitar = createModernButton("Solicitar", COLOR_ADVERTENCIA);
+        JButton btnCancelar = createModernButton("Cancelar", COLOR_ERROR);
 
-        if (result == JOptionPane.OK_OPTION) {
+        btnSolicitar.addActionListener(e -> {
             String tema = txtTema.getText().trim();
             String urgenciaStr = txtUrgencia.getText().trim();
 
             if (tema.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "Por favor indique el tema de ayuda",
-                        "Campo requerido",
-                        JOptionPane.WARNING_MESSAGE);
+                mostrarMensajeModerno("Error", "Por favor indique el tema de ayuda", COLOR_ERROR);
                 return;
             }
 
             try {
                 int nivel = Integer.parseInt(urgenciaStr);
                 if (nivel < 1 || nivel > 10) {
-                    JOptionPane.showMessageDialog(this,
-                            "El nivel de urgencia debe estar entre 1 y 10",
-                            "Valor inválido",
-                            JOptionPane.WARNING_MESSAGE);
+                    mostrarMensajeModerno("Error", "El nivel de urgencia debe estar entre 1 y 10", COLOR_ERROR);
                     return;
                 }
 
                 ayudaController.solicitarAyuda(usuario, tema, nivel);
-                JOptionPane.showMessageDialog(this,
-                        "Solicitud de ayuda registrada con éxito.",
-                        "Solicitud Enviada",
-                        JOptionPane.INFORMATION_MESSAGE);
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this,
-                        "El nivel de urgencia debe ser un número entero",
-                        "Formato inválido",
-                        JOptionPane.ERROR_MESSAGE);
+                mostrarMensajeModerno("Éxito", "Solicitud de ayuda registrada con éxito", COLOR_EXITO);
+                SwingUtilities.getWindowAncestor(panel).dispose();
+            } catch (NumberFormatException ex) {
+                mostrarMensajeModerno("Error", "El nivel de urgencia debe ser un número entero", COLOR_ERROR);
             }
-        }
+        });
+
+        btnCancelar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+
+        buttonPanel.add(btnSolicitar);
+        buttonPanel.add(btnCancelar);
+        panel.add(buttonPanel);
+
+        createModernDialog("Solicitar Ayuda", panel).setVisible(true);
     }
 
 
+
     private void enviarMensaje() {
-        JPanel panel = new JPanel(new GridLayout(2, 1, 0, 10));
-        panel.setBackground(COLOR_FONDO);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
 
-        JPanel destinoPanel = createFieldPanel("ID del destinatario:");
-        JPanel mensajePanel = createFieldPanel("Contenido del mensaje:");
+        JLabel titulo = new JLabel("💬 Enviar Mensaje");
+        titulo.setFont(FUENTE_TITULO);
+        titulo.setForeground(COLOR_TEXTO);
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titulo);
+        panel.add(Box.createVerticalStrut(20));
 
-        panel.add(destinoPanel);
-        panel.add(mensajePanel);
+        JTextField txtDestino = createModernTextField("");
+        JTextField txtMensaje = createModernTextField("");
 
-        JTextField txtDestino = (JTextField) ((JPanel)destinoPanel.getComponent(1)).getComponent(0);
-        JTextField txtMensaje = (JTextField) ((JPanel)mensajePanel.getComponent(1)).getComponent(0);
+        panel.add(crearCampoConEtiqueta("ID del destinatario:", txtDestino));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearCampoConEtiqueta("Contenido del mensaje:", txtMensaje));
+        panel.add(Box.createVerticalStrut(20));
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "Enviar Mensaje",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        buttonPanel.setOpaque(false);
+        JButton btnEnviar = createModernButton("Enviar", COLOR_EXITO);
+        JButton btnCancelar = createModernButton("Cancelar", COLOR_ERROR);
 
-        if (result == JOptionPane.OK_OPTION) {
+        btnEnviar.addActionListener(e -> {
             String idDestino = txtDestino.getText().trim();
             String mensaje = txtMensaje.getText().trim();
 
             if (idDestino.isEmpty() || mensaje.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "Todos los campos son obligatorios",
-                        "Campos incompletos",
-                        JOptionPane.WARNING_MESSAGE);
+                mostrarMensajeModerno("Error", "Todos los campos son obligatorios", COLOR_ERROR);
                 return;
             }
 
             Usuario destino = usuarioController.buscarUsuario(idDestino);
             if (destino == null) {
-                JOptionPane.showMessageDialog(this,
-                        "No se encontró un usuario con el ID proporcionado",
-                        "Usuario no encontrado",
-                        JOptionPane.ERROR_MESSAGE);
+                mostrarMensajeModerno("Error", "No se encontró un usuario con el ID proporcionado", COLOR_ERROR);
                 return;
             }
 
@@ -339,230 +680,382 @@ public class PanelEstudianteView extends JFrame {
             usuario.enviarMensaje(nuevo);
             destino.recibirMensaje(nuevo);
 
-            JOptionPane.showMessageDialog(this,
-            "<html>Mensaje enviado correctamente a <b>" + destino.getNombre() + "</b><br><br>" +
-            "<b>Contenido:</b><br>" + mensaje + "</html>",
-            "Mensaje Enviado",
-            JOptionPane.INFORMATION_MESSAGE);
-        }
+            // Conectar en el grafo si son usuarios distintos
+            if (!usuario.getId().equals(destino.getId())) {
+                grafoController.agregarUsuario(usuario);
+                grafoController.agregarUsuario(destino);
+                grafoController.conectarUsuarios(usuario, destino);
+            }
+
+            mostrarMensajeModerno("Éxito", "Mensaje enviado correctamente a " + destino.getNombre(), COLOR_EXITO);
+            SwingUtilities.getWindowAncestor(panel).dispose();
+        });
+
+        btnCancelar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+
+        buttonPanel.add(btnEnviar);
+        buttonPanel.add(btnCancelar);
+        panel.add(buttonPanel);
+
+        createModernDialog("Enviar Mensaje", panel).setVisible(true);
     }
 
+
     private void verRutaCorta() {
-        JPanel panel = new JPanel(new BorderLayout(0, 10));
-        panel.setBackground(COLOR_FONDO);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
 
-        JPanel destinoPanel = createFieldPanel("ID del usuario destino:");
-        panel.add(destinoPanel, BorderLayout.CENTER);
+        JLabel titulo = new JLabel("🗺️ Buscar Ruta Más Corta");
+        titulo.setFont(FUENTE_TITULO);
+        titulo.setForeground(COLOR_TEXTO);
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titulo);
+        panel.add(Box.createVerticalStrut(20));
 
-        JTextField txtDestino = (JTextField) ((JPanel)destinoPanel.getComponent(1)).getComponent(0);
+        JTextField txtDestino = createModernTextField("");
+        panel.add(crearCampoConEtiqueta("ID del usuario destino:", txtDestino));
+        panel.add(Box.createVerticalStrut(20));
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "Buscar Ruta",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        buttonPanel.setOpaque(false);
+        JButton btnBuscar = createModernButton("Buscar Ruta", COLOR_PRIMARIO);
+        JButton btnCancelar = createModernButton("Cancelar", COLOR_ERROR);
 
-        if (result == JOptionPane.OK_OPTION) {
+        btnBuscar.addActionListener(e -> {
             String idDestino = txtDestino.getText().trim();
 
             if (idDestino.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "Por favor indique el ID del usuario destino",
-                        "Campo requerido",
-                        JOptionPane.WARNING_MESSAGE);
+                mostrarMensajeModerno("Error", "Por favor indique el ID del usuario destino", COLOR_ERROR);
                 return;
             }
 
             model.ListaEnlazada<Usuario> camino = grafoController.caminoMasCorto(usuario.getId(), idDestino);
 
             if (camino == null || camino.estaVacia()) {
-                JOptionPane.showMessageDialog(this,
-                        "No se encontró un camino hacia el usuario especificado",
-                        "Ruta no encontrada",
-                        JOptionPane.INFORMATION_MESSAGE);
+                mostrarMensajeModerno("Sin Ruta", "No se encontró un camino hacia el usuario especificado", COLOR_ADVERTENCIA);
             } else {
-                JPanel resultPanel = new JPanel(new BorderLayout());
-                resultPanel.setBackground(COLOR_FONDO);
-
-                JLabel titulo = new JLabel("Camino más corto:");
-                titulo.setFont(FUENTE_ETIQUETA);
-                titulo.setForeground(COLOR_TEXTO);
-                resultPanel.add(titulo, BorderLayout.NORTH);
-
-                JPanel pathPanel = new JPanel();
-                pathPanel.setLayout(new BoxLayout(pathPanel, BoxLayout.Y_AXIS));
-                pathPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-                pathPanel.setBackground(COLOR_FONDO);
-
-                for (Usuario u : camino) {
-                    JLabel userLabel = new JLabel("→ " + u.getNombre() + " (ID: " + u.getId() + ")");
-                    userLabel.setFont(FUENTE_CAMPO);
-                    userLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-                    pathPanel.add(userLabel);
-                }
-
-                JScrollPane scrollPane = new JScrollPane(pathPanel);
-                scrollPane.setPreferredSize(new Dimension(350, 200));
-                resultPanel.add(scrollPane, BorderLayout.CENTER);
-
-                JOptionPane.showMessageDialog(this, resultPanel, "Ruta Más Corta",
-                        JOptionPane.PLAIN_MESSAGE);
+                mostrarRutaEncontrada(camino);
             }
+            SwingUtilities.getWindowAncestor(panel).dispose();
+        });
+
+        btnCancelar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+
+        buttonPanel.add(btnBuscar);
+        buttonPanel.add(btnCancelar);
+        panel.add(buttonPanel);
+
+        createModernDialog("Buscar Ruta", panel).setVisible(true);
+    }
+
+
+    private void mostrarRutaEncontrada(model.ListaEnlazada<Usuario> camino) {
+        JPanel panel = new JPanel(new BorderLayout(0, 15));
+        panel.setOpaque(false);
+
+        JLabel titulo = new JLabel("🗺️ Camino Más Corto Encontrado");
+        titulo.setFont(FUENTE_TITULO);
+        titulo.setForeground(COLOR_EXITO);
+        titulo.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JPanel pathPanel = new JPanel();
+        pathPanel.setLayout(new BoxLayout(pathPanel, BoxLayout.Y_AXIS));
+        pathPanel.setOpaque(false);
+
+        int paso = 1;
+        for (Usuario u : camino) {
+            JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            userPanel.setOpaque(false);
+            userPanel.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+
+            String icon = paso == 1 ? "🏁" : (paso == camino.tamano() ? "🎯" : "📍");
+            JLabel userLabel = new JLabel(icon + " " + u.getNombre() + " (ID: " + u.getId() + ")");
+            userLabel.setFont(FUENTE_CAMPO);
+            userLabel.setForeground(COLOR_TEXTO);
+
+            if (paso < camino.tamano()) {
+                JLabel arrow = new JLabel("     ↓");
+                arrow.setForeground(COLOR_PRIMARIO);
+                arrow.setFont(new Font("Segoe UI", Font.BOLD, 16));
+                userPanel.add(userLabel);
+                pathPanel.add(userPanel);
+                pathPanel.add(arrow);
+            } else {
+                userPanel.add(userLabel);
+                pathPanel.add(userPanel);
+            }
+            paso++;
         }
+
+        JScrollPane scrollPane = new JScrollPane(pathPanel);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(400, 250));
+
+        panel.add(titulo, BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton btnCerrar = createModernButton("Cerrar", COLOR_PRIMARIO);
+        btnCerrar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+        panel.add(btnCerrar, BorderLayout.SOUTH);
+
+        createModernDialog("Ruta Encontrada", panel).setVisible(true);
     }
 
     private void mostrarHistorial() {
         model.NodoLista<String> actual = usuario.getHistorialAcciones().getCabeza();
 
         if (actual == null) {
-            JOptionPane.showMessageDialog(this,
-                    "No hay actividades registradas en el historial",
-                    "Historial Vacío",
-                    JOptionPane.INFORMATION_MESSAGE);
+            mostrarMensajeModerno("Historial Vacío",
+                    "No hay actividades registradas en el historial", COLOR_ADVERTENCIA);
             return;
         }
 
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(COLOR_FONDO);
+        JPanel panel = new JPanel(new BorderLayout(0, 15));
+        panel.setOpaque(false);
 
-        JLabel titulo = new JLabel("Historial de Actividades:");
-        titulo.setFont(FUENTE_ETIQUETA);
+        JLabel titulo = new JLabel("📋 Historial de Actividades");
+        titulo.setFont(FUENTE_TITULO);
         titulo.setForeground(COLOR_TEXTO);
-        panel.add(titulo, BorderLayout.NORTH);
+        titulo.setHorizontalAlignment(SwingConstants.CENTER);
 
         JPanel historialPanel = new JPanel();
         historialPanel.setLayout(new BoxLayout(historialPanel, BoxLayout.Y_AXIS));
-        historialPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-        historialPanel.setBackground(COLOR_FONDO);
+        historialPanel.setOpaque(false);
 
+        int contador = 1;
         while (actual != null) {
-            JLabel accionLabel = new JLabel("• " + actual.getDato());
+            JPanel activityPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            activityPanel.setOpaque(false);
+            activityPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+            JLabel accionLabel = new JLabel(contador + ". " + actual.getDato());
             accionLabel.setFont(FUENTE_CAMPO);
-            accionLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-            historialPanel.add(accionLabel);
+            accionLabel.setForeground(COLOR_TEXTO);
+            activityPanel.add(accionLabel);
+
+            historialPanel.add(activityPanel);
             actual = actual.getSiguiente();
+            contador++;
         }
 
         JScrollPane scrollPane = new JScrollPane(historialPanel);
-        scrollPane.setPreferredSize(new Dimension(400, 250));
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(500, 300));
+
+        panel.add(titulo, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        JOptionPane.showMessageDialog(this, panel, "Historial de Actividades",
-                JOptionPane.PLAIN_MESSAGE);
+        JButton btnCerrar = createModernButton("Cerrar", COLOR_PRIMARIO);
+        btnCerrar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+        panel.add(btnCerrar, BorderLayout.SOUTH);
+
+        createModernDialog("Historial de Actividades", panel).setVisible(true);
     }
 
     private void mostrarContenidos() {
-        // Obtener todos los contenidos publicados
         ListaEnlazada<Contenido> contenidos = AppContext.contenidoController.obtenerTodosLosContenidos();
 
         if (contenidos.estaVacia()) {
-            JOptionPane.showMessageDialog(this, "No hay contenidos publicados.",
-                    "Contenidos Vacíos", JOptionPane.INFORMATION_MESSAGE);
+            mostrarMensajeModerno("Sin Contenidos", "No hay contenidos publicados.", COLOR_ADVERTENCIA);
             return;
         }
 
-        // Crear un panel para mostrar los contenidos
-        JPanel panel = new JPanel(new BorderLayout(0, 10));
-        panel.setBackground(COLOR_FONDO);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel panel = new JPanel(new BorderLayout(0, 15));
+        panel.setOpaque(false);
 
-        JTextArea textArea = new JTextArea();
-        textArea.setEditable(false);
+        JLabel titulo = new JLabel("📚 Contenidos Publicados");
+        titulo.setFont(FUENTE_TITULO);
+        titulo.setForeground(COLOR_TEXTO);
+        titulo.setHorizontalAlignment(SwingConstants.CENTER);
 
-        StringBuilder sb = new StringBuilder();
+        JPanel contenidosPanel = new JPanel();
+        contenidosPanel.setLayout(new BoxLayout(contenidosPanel, BoxLayout.Y_AXIS));
+        contenidosPanel.setOpaque(false);
+
         for (Contenido contenido : contenidos) {
-            sb.append("ID: ").append(contenido.getId()).append("\n");
-            sb.append("Título: ").append(contenido.getTitulo()).append("\n");
-            sb.append("Autor: ").append(contenido.getAutor()).append("\n");
-            sb.append("Tema: ").append(contenido.getTema()).append("\n");
-            sb.append("Tipo: ").append(contenido.getTipo()).append("\n");
-            sb.append("Enlace: ").append(contenido.getEnlace()).append("\n");
-            sb.append("Promedio de Valoraciones: ").append(contenido.obtenerPromedio()).append("\n");
-            sb.append("--------------------------------------------------\n");
+            JPanel contentCard = createContentCard(contenido);
+            contenidosPanel.add(contentCard);
+            contenidosPanel.add(Box.createVerticalStrut(10));
         }
 
-        textArea.setText(sb.toString());
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(500, 300));
+        JScrollPane scrollPane = new JScrollPane(contenidosPanel);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(600, 400));
+
+        panel.add(titulo, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        JOptionPane.showMessageDialog(this, panel, "Contenidos Publicados",
-                JOptionPane.PLAIN_MESSAGE);
+        JButton btnCerrar = createModernButton("Cerrar", COLOR_PRIMARIO);
+        btnCerrar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+        panel.add(btnCerrar, BorderLayout.SOUTH);
+
+        createModernDialog("Contenidos Publicados", panel).setVisible(true);
+    }
+
+    private JPanel createContentCard(Contenido contenido) {
+        JPanel card = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Sombra
+                g2d.setColor(new Color(0, 0, 0, 30));
+                g2d.fillRoundRect(3, 3, getWidth()-3, getHeight()-3, 15, 15);
+
+                // Fondo
+                g2d.setColor(COLOR_FONDO_CLARO);
+                g2d.fillRoundRect(0, 0, getWidth()-3, getHeight()-3, 15, 15);
+
+                // Borde
+                g2d.setColor(COLOR_PRIMARIO);
+                g2d.setStroke(new BasicStroke(1f));
+                g2d.drawRoundRect(1, 1, getWidth()-5, getHeight()-5, 15, 15);
+
+                g2d.dispose();
+            }
+        };
+
+        card.setLayout(new BorderLayout());
+        card.setOpaque(false);
+        card.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+
+        // Información del contenido
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setOpaque(false);
+
+        JLabel tituloLabel = new JLabel("📄 " + contenido.getTitulo());
+        tituloLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        tituloLabel.setForeground(COLOR_TEXTO);
+
+        JLabel autorLabel = new JLabel("👤 Autor: " + contenido.getAutor());
+        autorLabel.setFont(FUENTE_CAMPO);
+        autorLabel.setForeground(COLOR_TEXTO_SECUNDARIO);
+
+        JLabel temaLabel = new JLabel("🏷️ Tema: " + contenido.getTema());
+        temaLabel.setFont(FUENTE_CAMPO);
+        temaLabel.setForeground(COLOR_TEXTO_SECUNDARIO);
+
+        JLabel tipoLabel = new JLabel("📋 Tipo: " + contenido.getTipo());
+        tipoLabel.setFont(FUENTE_CAMPO);
+        tipoLabel.setForeground(COLOR_TEXTO_SECUNDARIO);
+
+        String enlaceTexto = contenido.getEnlace().isEmpty() ? "Sin enlace" : contenido.getEnlace();
+        JLabel enlaceLabel = new JLabel("🔗 Enlace: " + enlaceTexto);
+        enlaceLabel.setFont(FUENTE_CAMPO);
+        enlaceLabel.setForeground(COLOR_TEXTO_SECUNDARIO);
+
+        JLabel valoracionLabel = new JLabel("⭐ Valoración: " + String.format("%.1f", contenido.obtenerPromedio()));
+        valoracionLabel.setFont(FUENTE_CAMPO);
+        valoracionLabel.setForeground(COLOR_ACENTO);
+
+        infoPanel.add(tituloLabel);
+        infoPanel.add(Box.createVerticalStrut(5));
+        infoPanel.add(autorLabel);
+        infoPanel.add(temaLabel);
+        infoPanel.add(tipoLabel);
+        infoPanel.add(enlaceLabel);
+        infoPanel.add(Box.createVerticalStrut(5));
+        infoPanel.add(valoracionLabel);
+
+        card.add(infoPanel, BorderLayout.CENTER);
+        return card;
     }
 
     private void valorarContenido() {
-        JPanel panel = new JPanel(new BorderLayout(0, 10));
-        panel.setBackground(COLOR_FONDO);
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
 
-        // Campo para ingresar el ID del contenido
-        JPanel idPanel = createFieldPanel("ID del contenido a valorar:");
-        panel.add(idPanel, BorderLayout.NORTH);
+        JLabel titulo = new JLabel("⭐ Valorar Contenido");
+        titulo.setFont(FUENTE_TITULO);
+        titulo.setForeground(COLOR_TEXTO);
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titulo);
+        panel.add(Box.createVerticalStrut(20));
 
-        JTextField txtIdContenido = (JTextField) ((JPanel) idPanel.getComponent(1)).getComponent(0);
+        JTextField txtIdContenido = createModernTextField("");
+        JTextField txtValoracion = createModernTextField("");
 
-        // Mostrar cuadro de diálogo para ingresar el ID del contenido
-        int result = JOptionPane.showConfirmDialog(this, panel, "Buscar Contenido",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (result != JOptionPane.OK_OPTION) return;
+        panel.add(crearCampoConEtiqueta("ID del contenido:", txtIdContenido));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearCampoConEtiqueta("Valoración (1-5):", txtValoracion));
+        panel.add(Box.createVerticalStrut(20));
 
-        String idContenido = txtIdContenido.getText().trim();
-        if (idContenido.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Por favor ingrese el ID del contenido",
-                    "Campo requerido", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        buttonPanel.setOpaque(false);
+        JButton btnValorar = createModernButton("Valorar", COLOR_ACENTO);
+        JButton btnCancelar = createModernButton("Cancelar", COLOR_ERROR);
 
-        try {
-            // Buscar el contenido por ID
-            Contenido contenido = AppContext.contenidoController.buscarContenidoPorId(Integer.parseInt(idContenido));
-            if (contenido == null) {
-                JOptionPane.showMessageDialog(this,
-                        "No se encontró un contenido con el ID proporcionado",
-                        "Contenido no encontrado", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            // Crear un panel para ingresar la valoración
-            JPanel valoracionPanel = new JPanel(new BorderLayout(0, 10));
-            valoracionPanel.setBackground(COLOR_FONDO);
-            valoracionPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-            JLabel lblValoracion = new JLabel("Ingrese una valoración (1-5):");
-            lblValoracion.setFont(FUENTE_ETIQUETA);
-            lblValoracion.setForeground(COLOR_TEXTO);
-            valoracionPanel.add(lblValoracion, BorderLayout.NORTH);
-
-            JTextField txtValoracion = new JTextField();
-            valoracionPanel.add(txtValoracion, BorderLayout.CENTER);
-
-            // Mostrar cuadro de diálogo para ingresar la valoración
-            result = JOptionPane.showConfirmDialog(this, valoracionPanel, "Valorar Contenido",
-                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-            if (result != JOptionPane.OK_OPTION) return;
-
+        btnValorar.addActionListener(e -> {
+            String idContenido = txtIdContenido.getText().trim();
             String valoracionStr = txtValoracion.getText().trim();
-            if (valoracionStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Por favor ingrese una valoración",
-                        "Campo requerido", JOptionPane.WARNING_MESSAGE);
+
+            if (idContenido.isEmpty() || valoracionStr.isEmpty()) {
+                mostrarMensajeModerno("Error", "Todos los campos son obligatorios", COLOR_ERROR);
                 return;
             }
 
-            int valoracion = Integer.parseInt(valoracionStr);
-            if (valoracion < 1 || valoracion > 5) {
-                JOptionPane.showMessageDialog(this, "La valoración debe estar entre 1 y 5",
-                        "Valoración inválida", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
+            try {
+                int id = Integer.parseInt(idContenido);
+                int valoracion = Integer.parseInt(valoracionStr);
 
-            // Registrar la valoración en el contenido
-            AppContext.contenidoController.valorarContenido(idContenido, valoracion, usuario);
-            JOptionPane.showMessageDialog(this, "Contenido valorado con éxito.");
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "La valoración debe ser un número entre 1 y 5",
-                    "Formato inválido", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                if (valoracion < 1 || valoracion > 5) {
+                    mostrarMensajeModerno("Error", "La valoración debe estar entre 1 y 5", COLOR_ERROR);
+                    return;
+                }
+
+                Contenido contenido = AppContext.contenidoController.buscarContenidoPorId(id);
+                if (contenido == null) {
+                    mostrarMensajeModerno("Error", "No se encontró un contenido con el ID proporcionado", COLOR_ERROR);
+                    return;
+                }
+
+                AppContext.contenidoController.valorarContenido(idContenido, valoracion, usuario);
+
+                // Conexión automática con el autor
+                Usuario autor = AppContext.usuarioController.buscarUsuario(contenido.getAutor());
+                if (autor != null && !autor.getId().equals(usuario.getId())) {
+                    grafoController.agregarUsuario(usuario);
+                    grafoController.agregarUsuario(autor);
+                    grafoController.conectarUsuarios(usuario, autor);
+                }
+
+                mostrarMensajeModerno("Éxito", "Contenido valorado con éxito", COLOR_EXITO);
+                SwingUtilities.getWindowAncestor(panel).dispose();
+
+            } catch (NumberFormatException ex) {
+                mostrarMensajeModerno("Error", "Por favor ingrese valores numéricos válidos", COLOR_ERROR);
+            } catch (Exception ex) {
+                mostrarMensajeModerno("Error", "Error: " + ex.getMessage(), COLOR_ERROR);
+            }
+        });
+
+        btnCancelar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+
+        buttonPanel.add(btnValorar);
+        buttonPanel.add(btnCancelar);
+        panel.add(buttonPanel);
+
+        createModernDialog("Valorar Contenido", panel).setVisible(true);
+    }
+
+
+    @Override
+    public void dispose() {
+        if (animationTimer != null) {
+            animationTimer.stop();
         }
+        super.dispose();
     }
 }

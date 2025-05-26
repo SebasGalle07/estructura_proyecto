@@ -4,381 +4,478 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.*;
 import java.util.ResourceBundle;
 
 /**
- * Vista principal de la aplicación Red Social de Aprendizaje Colaborativo
- * Clase mejorada con soporte para accesibilidad, internacionalización y diseño responsive
+ * Vista principal moderna con diseño dark theme y efectos visuales avanzados
+ * Red Social de Aprendizaje Colaborativo - Versión Moderna
  */
 public class MainView extends JFrame {
-    // Extraemos las constantes de estilo a una clase de utilidad (referencia)
-    private static final StyleConstants STYLE = StyleConstants.getInstance();
+
+    // Paleta de colores moderna (Dark Theme)
+    private static final Color COLOR_PRIMARIO = new Color(79, 70, 229); // Índigo
+    private static final Color COLOR_SECUNDARIO = new Color(139, 92, 246); // Violeta
+    private static final Color COLOR_ACENTO = new Color(236, 72, 153); // Rosa
+    private static final Color COLOR_FONDO = new Color(15, 23, 42); // Azul muy oscuro
+    private static final Color COLOR_FONDO_CLARO = new Color(30, 41, 59); // Azul oscuro
+    private static final Color COLOR_TARJETA = new Color(51, 65, 85); // Gris azulado
+    private static final Color COLOR_TEXTO = new Color(248, 250, 252); // Blanco hueso
+    private static final Color COLOR_TEXTO_SECUNDARIO = new Color(148, 163, 184); // Gris claro
+    private static final Color COLOR_EXITO = new Color(34, 197, 94); // Verde
+    private static final Color COLOR_ADVERTENCIA = new Color(251, 191, 36); // Amarillo
+    private static final Color COLOR_ERROR = new Color(239, 68, 68); // Rojo
+
+    // Fuentes modernas
+    private static final Font FUENTE_TITULO = new Font("Segoe UI", Font.BOLD, 28);
+    private static final Font FUENTE_SUBTITULO = new Font("Segoe UI", Font.PLAIN, 16);
+    private static final Font FUENTE_BOTON = new Font("Segoe UI", Font.BOLD, 14);
+    private static final Font FUENTE_ETIQUETA = new Font("Segoe UI", Font.PLAIN, 14);
+    private static final Font FUENTE_CAMPO = new Font("Segoe UI", Font.PLAIN, 14);
+
+    // Componentes principales
+    private JPanel mainPanel;
+    private ModernButton btnRegistro;
+    private ModernButton btnLogin;
+    private ModernButton btnSalir;
+    private JLabel iconoApp;
+    private Timer animationTimer;
+    private int animationFrame = 0;
 
     // Soporte para internacionalización
     private ResourceBundle messages;
 
-    // Componentes principales
-    private JPanel mainPanel;
-    private JButton btnRegistro;
-    private JButton btnLogin;
-    private JButton btnSalir;
-
-    /**
-     * Constructor principal de la vista
-     */
     public MainView() {
-        // Cargar textos localizados (por defecto en español)
         loadLocalizedResources("es");
-
-        // Configuración básica de la ventana
-        setTitle(messages.getString("app.title"));
-        setMinimumSize(new Dimension(500, 400));
-        setPreferredSize(new Dimension(600, 500));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-        // Permitir redimensionamiento para mejor experiencia en diferentes pantallas
-        setResizable(true);
-
-        // Inicializar componentes de la interfaz
-        initComponents();
-
-        // Configurar manejadores de eventos
+        initModernUI();
+        setupAnimations();
         setupEventHandlers();
 
-        // Configurar accesibilidad
-        setupAccessibility();
+        // Configuración de la ventana
+        setTitle("Red Social de Aprendizaje Colaborativo");
+        setMinimumSize(new Dimension(600, 700));
+        setPreferredSize(new Dimension(800, 900));
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setResizable(true);
 
-        // Empaquetar y ajustar tamaño automáticamente
         pack();
     }
 
-    /**
-     * Carga los recursos de texto localizados según el idioma especificado
-     * @param language código de idioma (ej: "es" para español)
-     */
     private void loadLocalizedResources(String language) {
-        try {
-            // En una implementación real, cargaría desde un archivo .properties
-            // Por ahora usamos un bundle simulado
-            messages = new ResourceBundle() {
-                @Override
-                protected Object handleGetObject(String key) {
-                    switch (key) {
-                        case "app.title": return "Red Social de Aprendizaje Colaborativo";
-                        case "main.title": return "Red Social de Aprendizaje";
-                        case "main.subtitle": return "Colaboración y conocimiento compartido";
-                        case "button.register": return "Registrarse";
-                        case "button.login": return "Iniciar Sesión";
-                        case "button.exit": return "Salir";
-                        case "footer.copyright": return "© 2025 - Sistema de Aprendizaje Colaborativo";
-                        case "exit.confirm.title": return "Confirmar salida";
-                        case "exit.confirm.message": return "¿Estás seguro que deseas salir de la aplicación?";
-                        default: return null;
-                    }
+        messages = new ResourceBundle() {
+            @Override
+            protected Object handleGetObject(String key) {
+                switch (key) {
+                    case "app.title": return "Red Social de Aprendizaje";
+                    case "app.subtitle": return "Conecta, aprende y colabora";
+                    case "app.description": return "Únete a una comunidad global de aprendizaje colaborativo";
+                    case "button.register": return "Crear Cuenta";
+                    case "button.login": return "Iniciar Sesión";
+                    case "button.exit": return "Salir";
+                    case "footer.version": return "Versión 2.0 - Desarrollado con ❤️";
+                    case "exit.confirm.title": return "Confirmar Salida";
+                    case "exit.confirm.message": return "¿Estás seguro que deseas cerrar la aplicación?";
+                    default: return key;
                 }
+            }
 
-                @Override
-                public java.util.Enumeration<String> getKeys() {
-                    return null; // No implementado para este ejemplo
-                }
-            };
-        } catch (Exception e) {
-            System.err.println("Error cargando recursos de idioma: " + e.getMessage());
-            // Fallback a textos por defecto
-        }
+            @Override
+            public java.util.Enumeration<String> getKeys() {
+                return null;
+            }
+        };
     }
 
-    /**
-     * Inicializa y configura todos los componentes de la interfaz
-     */
-    private void initComponents() {
-        // Panel principal con BorderLayout para mejor organización y adaptabilidad
-        mainPanel = new JPanel(new BorderLayout(0, 10));
-        mainPanel.setBackground(STYLE.COLOR_FONDO);
+    private void initModernUI() {
+        // Panel principal con gradiente
+        mainPanel = new GradientPanel();
+        mainPanel.setLayout(new BorderLayout());
 
-        // Añadir los tres paneles principales
-        mainPanel.add(createTitlePanel(), BorderLayout.NORTH);
-        mainPanel.add(createButtonPanel(), BorderLayout.CENTER);
-        mainPanel.add(createFooterPanel(), BorderLayout.SOUTH);
+        // Header con logo y título
+        JPanel headerPanel = createHeaderPanel();
 
-        // Agregar panel principal al frame con margen
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // Panel central con botones
+        JPanel centerPanel = createCenterPanel();
+
+        // Footer moderno
+        JPanel footerPanel = createFooterPanel();
+
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
+        mainPanel.add(footerPanel, BorderLayout.SOUTH);
+
         setContentPane(mainPanel);
     }
 
-    /**
-     * Crea el panel de título en la parte superior
-     */
-    private JPanel createTitlePanel() {
-        JPanel titlePanel = new JPanel(new BorderLayout());
-        titlePanel.setBackground(STYLE.COLOR_HEADER);
-        titlePanel.setBorder(new EmptyBorder(25, 20, 25, 20));
+    private JPanel createHeaderPanel() {
+        JPanel header = new JPanel();
+        header.setOpaque(false);
+        header.setLayout(new BoxLayout(header, BoxLayout.Y_AXIS));
+        header.setBorder(BorderFactory.createEmptyBorder(40, 30, 30, 30));
 
-        // Título principal
-        JLabel lblTitulo = new JLabel(messages.getString("main.title"), SwingConstants.CENTER);
-        lblTitulo.setFont(STYLE.FUENTE_TITULO);
-        lblTitulo.setForeground(STYLE.COLOR_TEXTO);
+        // Icono de la aplicación (simulado con formas geométricas)
+        iconoApp = new JLabel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int size = 80;
+                int x = (getWidth() - size) / 2;
+                int y = (getHeight() - size) / 2;
+
+                // Crear gradiente para el icono
+                GradientPaint gradient = new GradientPaint(
+                        x, y, COLOR_PRIMARIO,
+                        x + size, y + size, COLOR_SECUNDARIO
+                );
+                g2d.setPaint(gradient);
+
+                // Dibujar círculo con efecto de rotación suave
+                double rotation = Math.toRadians(animationFrame * 2);
+                g2d.rotate(rotation, x + size/2, y + size/2);
+
+                // Círculo principal
+                g2d.fillOval(x, y, size, size);
+
+                // Elementos decorativos
+                g2d.setColor(COLOR_ACENTO);
+                g2d.fillOval(x + 15, y + 15, 20, 20);
+                g2d.fillOval(x + 45, y + 25, 15, 15);
+                g2d.fillOval(x + 25, y + 45, 12, 12);
+
+                g2d.dispose();
+            }
+        };
+        iconoApp.setPreferredSize(new Dimension(100, 100));
+        iconoApp.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Título principal con efecto de brillo
+        JLabel titulo = new JLabel(messages.getString("app.title"));
+        titulo.setFont(FUENTE_TITULO);
+        titulo.setForeground(COLOR_TEXTO);
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titulo.setBorder(BorderFactory.createEmptyBorder(20, 0, 5, 0));
 
         // Subtítulo
-        JLabel lblSubtitulo = new JLabel(messages.getString("main.subtitle"), SwingConstants.CENTER);
-        lblSubtitulo.setFont(STYLE.FUENTE_SUBTITULO);
-        lblSubtitulo.setForeground(STYLE.COLOR_TEXTO);
+        JLabel subtitulo = new JLabel(messages.getString("app.subtitle"));
+        subtitulo.setFont(FUENTE_SUBTITULO);
+        subtitulo.setForeground(COLOR_TEXTO_SECUNDARIO);
+        subtitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Panel para agrupar título y subtítulo con espaciado
-        JPanel titleTextPanel = new JPanel(new BorderLayout(0, 5));
-        titleTextPanel.setOpaque(false);
-        titleTextPanel.add(lblTitulo, BorderLayout.CENTER);
-        titleTextPanel.add(lblSubtitulo, BorderLayout.SOUTH);
+        // Descripción
+        JLabel descripcion = new JLabel(messages.getString("app.description"));
+        descripcion.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        descripcion.setForeground(COLOR_TEXTO_SECUNDARIO);
+        descripcion.setAlignmentX(Component.CENTER_ALIGNMENT);
+        descripcion.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
-        titlePanel.add(titleTextPanel, BorderLayout.CENTER);
+        header.add(iconoApp);
+        header.add(titulo);
+        header.add(subtitulo);
+        header.add(descripcion);
 
-        return titlePanel;
+        return header;
     }
 
-    /**
-     * Crea el panel central con los botones
-     */
-    private JPanel createButtonPanel() {
-        // Panel con GridBagLayout para mejor adaptabilidad a diferentes tamaños
-        JPanel buttonPanel = new JPanel(new GridBagLayout());
-        buttonPanel.setBackground(STYLE.COLOR_FONDO);
+    private JPanel createCenterPanel() {
+        JPanel center = new JPanel();
+        center.setOpaque(false);
+        center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
+        center.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
 
-        // Crear botones principales con estilos
-        btnRegistro = createStyledButton(messages.getString("button.register"), STYLE.COLOR_BOTON_PRIMARIO);
-        btnLogin = createStyledButton(messages.getString("button.login"), STYLE.COLOR_BOTON_SECUNDARIO);
-        btnSalir = createStyledButton(messages.getString("button.exit"), STYLE.COLOR_BOTON_SALIR);
+        // Crear botones modernos
+        btnRegistro = new ModernButton(messages.getString("button.register"), COLOR_PRIMARIO, COLOR_SECUNDARIO);
+        btnLogin = new ModernButton(messages.getString("button.login"), COLOR_SECUNDARIO, COLOR_PRIMARIO);
+        btnSalir = new ModernButton(messages.getString("button.exit"), COLOR_TARJETA, COLOR_FONDO_CLARO);
 
-        // Configurar disposición de los botones con GridBagConstraints
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10, 80, 10, 80);
+        // Configurar botones
+        Dimension buttonSize = new Dimension(300, 55);
 
-        // Añadir los botones al panel
-        buttonPanel.add(btnRegistro, gbc);
-        buttonPanel.add(btnLogin, gbc);
-        buttonPanel.add(btnSalir, gbc);
+        btnRegistro.setMaximumSize(buttonSize);
+        btnRegistro.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        return buttonPanel;
+        btnLogin.setMaximumSize(buttonSize);
+        btnLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        btnSalir.setMaximumSize(buttonSize);
+        btnSalir.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnSalir.setForeground(COLOR_TEXTO_SECUNDARIO);
+
+        // Espaciado entre botones
+        center.add(Box.createVerticalStrut(20));
+        center.add(btnRegistro);
+        center.add(Box.createVerticalStrut(15));
+        center.add(btnLogin);
+        center.add(Box.createVerticalStrut(15));
+        center.add(btnSalir);
+        center.add(Box.createVerticalStrut(20));
+
+        return center;
     }
 
-    /**
-     * Crea el panel de pie de página
-     */
     private JPanel createFooterPanel() {
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        footerPanel.setBackground(new Color(235, 245, 250));
-        footerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        footer.setOpaque(false);
+        footer.setBorder(BorderFactory.createEmptyBorder(20, 20, 30, 20));
 
-        JLabel lblFooter = new JLabel(messages.getString("footer.copyright"));
-        lblFooter.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblFooter.setForeground(new Color(100, 100, 100));
+        JLabel footerText = new JLabel(messages.getString("footer.version"));
+        footerText.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        footerText.setForeground(COLOR_TEXTO_SECUNDARIO);
 
-        footerPanel.add(lblFooter);
-
-        return footerPanel;
+        footer.add(footerText);
+        return footer;
     }
 
-    /**
-     * Crea un botón estilizado con el color especificado
-     */
-    private JButton createStyledButton(String text, Color bgColor) {
-        JButton button = new JButton(text);
-        button.setFont(STYLE.FUENTE_BOTON);
-        button.setBackground(bgColor);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Mejorar el contraste para accesibilidad
-        if (isLightColor(bgColor)) {
-            button.setForeground(Color.BLACK);
-        }
-
-        // Efecto de sombra suave
-        button.setBorder(BorderFactory.createCompoundBorder(
-                new SoftBevelBorder(SoftBevelBorder.RAISED),
-                BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
-
-        return button;
+    private void setupAnimations() {
+        animationTimer = new Timer(50, e -> {
+            animationFrame++;
+            if (animationFrame >= 180) animationFrame = 0;
+            iconoApp.repaint();
+        });
+        animationTimer.start();
     }
 
-    /**
-     * Determina si un color es claro (para ajustar contraste del texto)
-     */
-    private boolean isLightColor(Color color) {
-        // Fórmula para calcular la luminosidad percibida
-        double luminance = (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
-        return luminance > 0.5;
-    }
-
-    /**
-     * Configura los manejadores de eventos para los botones
-     */
     private void setupEventHandlers() {
-        // Utilizar clases de listener definidas en lugar de clases anónimas
-        ButtonHoverListener hoverListener = new ButtonHoverListener();
-
-        // Listener para efecto hover en botones
-        btnRegistro.addMouseListener(new ButtonHoverListener(btnRegistro, STYLE.COLOR_BOTON_PRIMARIO));
-        btnLogin.addMouseListener(new ButtonHoverListener(btnLogin, STYLE.COLOR_BOTON_SECUNDARIO));
-        btnSalir.addMouseListener(new ButtonHoverListener(btnSalir, STYLE.COLOR_BOTON_SALIR));
-
-        // Acciones para los botones
+        // Eventos de botones
         btnRegistro.addActionListener(e -> openRegistroView());
         btnLogin.addActionListener(e -> openLoginView());
         btnSalir.addActionListener(e -> confirmExit());
 
-        // Manejador de ventana para confirmar salida
+        // Manejador de cierre de ventana
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 confirmExit();
             }
         });
+
+        // Atajos de teclado
+        setupKeyboardShortcuts();
     }
 
-    /**
-     * Configura características de accesibilidad
-     */
-    private void setupAccessibility() {
-        // Configurar descripciones para lectores de pantalla
-        btnRegistro.getAccessibleContext().setAccessibleDescription("Botón para registrarse como nuevo usuario");
-        btnLogin.getAccessibleContext().setAccessibleDescription("Botón para iniciar sesión con una cuenta existente");
-        btnSalir.getAccessibleContext().setAccessibleDescription("Botón para salir de la aplicación");
+    private void setupKeyboardShortcuts() {
+        // Configurar atajos
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK), "registro");
+        getRootPane().getActionMap().put("registro", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openRegistroView();
+            }
+        });
 
-        // Añadir atajos de teclado
-        btnRegistro.setMnemonic(KeyEvent.VK_R); // Alt+R
-        btnLogin.setMnemonic(KeyEvent.VK_I);    // Alt+I
-        btnSalir.setMnemonic(KeyEvent.VK_S);    // Alt+S
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK), "login");
+        getRootPane().getActionMap().put("login", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openLoginView();
+            }
+        });
 
-        // Orden de tabulación lógico
-        btnRegistro.setFocusable(true);
-        btnLogin.setFocusable(true);
-        btnSalir.setFocusable(true);
-
-        // Establecer el orden de tabulación
-        FocusTraversalPolicy policy = new LayoutFocusTraversalPolicy();
-        setFocusTraversalPolicy(policy);
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "salir");
+        getRootPane().getActionMap().put("salir", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                confirmExit();
+            }
+        });
     }
 
-    /**
-     * Abre la vista de registro
-     */
     private void openRegistroView() {
         new RegistroView().setVisible(true);
         dispose();
     }
 
-    /**
-     * Abre la vista de inicio de sesión
-     */
+
+
     private void openLoginView() {
+        JOptionPane.showMessageDialog(this,
+                "Abriendo vista de login...",
+                "Navegación",
+                JOptionPane.INFORMATION_MESSAGE);
         new LoginView().setVisible(true);
         dispose();
     }
 
-    /**
-     * Muestra diálogo de confirmación para salir
-     */
     private void confirmExit() {
-        int respuesta = JOptionPane.showConfirmDialog(
-                this,
-                messages.getString("exit.confirm.message"),
-                messages.getString("exit.confirm.title"),
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-        );
+        // Crear diálogo personalizado
+        JDialog dialog = new JDialog(this, messages.getString("exit.confirm.title"), true);
+        dialog.setLayout(new BorderLayout());
+        dialog.getContentPane().setBackground(COLOR_FONDO_CLARO);
 
-        if (respuesta == JOptionPane.YES_OPTION) {
+        // Panel de mensaje
+        JPanel messagePanel = new JPanel(new FlowLayout());
+        messagePanel.setOpaque(false);
+        messagePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel messageLabel = new JLabel(messages.getString("exit.confirm.message"));
+        messageLabel.setForeground(COLOR_TEXTO);
+        messageLabel.setFont(FUENTE_ETIQUETA);
+        messagePanel.add(messageLabel);
+
+        // Panel de botones
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.setOpaque(false);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 20));
+
+        ModernButton btnSi = new ModernButton("Sí", COLOR_ERROR, COLOR_ERROR.brighter());
+        ModernButton btnNo = new ModernButton("No", COLOR_TARJETA, COLOR_FONDO_CLARO);
+
+        btnSi.setPreferredSize(new Dimension(80, 35));
+        btnNo.setPreferredSize(new Dimension(80, 35));
+
+        btnSi.addActionListener(e -> {
+            dialog.dispose();
+            animationTimer.stop();
             System.exit(0);
+        });
+
+        btnNo.addActionListener(e -> dialog.dispose());
+
+        buttonPanel.add(btnNo);
+        buttonPanel.add(Box.createHorizontalStrut(10));
+        buttonPanel.add(btnSi);
+
+        dialog.add(messagePanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.setSize(350, 150);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
+    // Clase para panel con gradiente de fondo
+    private class GradientPanel extends JPanel {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Gradiente principal
+            GradientPaint gradient = new GradientPaint(
+                    0, 0, COLOR_FONDO,
+                    0, getHeight(), COLOR_FONDO_CLARO
+            );
+            g2d.setPaint(gradient);
+            g2d.fillRect(0, 0, getWidth(), getHeight());
+
+            // Efectos de luz suaves
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f));
+
+            // Círculos decorativos con efecto de pulso
+            int pulse = (int)(Math.sin(animationFrame * 0.1) * 20 + 50);
+            g2d.setColor(COLOR_PRIMARIO);
+            g2d.fillOval(getWidth() - 200, -100, pulse + 150, pulse + 150);
+
+            g2d.setColor(COLOR_SECUNDARIO);
+            g2d.fillOval(-100, getHeight() - 200, pulse + 100, pulse + 100);
+
+            g2d.setColor(COLOR_ACENTO);
+            g2d.fillOval(getWidth() - 100, getHeight() - 150, pulse + 80, pulse + 80);
+
+            g2d.dispose();
         }
     }
 
-    /**
-     * Clase interna para manejar efectos hover en botones
-     */
-    private class ButtonHoverListener extends MouseAdapter {
-        private final JButton button;
-        private final Color originalColor;
+    // Clase para botones modernos con efectos
+    private class ModernButton extends JButton {
+        private Color baseColor;
+        private Color hoverColor;
+        private boolean isHovered = false;
+        private Timer hoverTimer;
+        private float hoverAlpha = 0.0f;
 
-        public ButtonHoverListener() {
-            this.button = null;
-            this.originalColor = null;
+        public ModernButton(String text, Color baseColor, Color hoverColor) {
+            super(text);
+            this.baseColor = baseColor;
+            this.hoverColor = hoverColor;
+
+            setForeground(COLOR_TEXTO);
+            setFont(FUENTE_BOTON);
+            setFocusPainted(false);
+            setBorderPainted(false);
+            setContentAreaFilled(false);
+            setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            // Configurar animaciones de hover
+            setupHoverAnimation();
         }
 
-        public ButtonHoverListener(JButton button, Color originalColor) {
-            this.button = button;
-            this.originalColor = originalColor;
+        private void setupHoverAnimation() {
+            hoverTimer = new Timer(20, e -> {
+                if (isHovered && hoverAlpha < 1.0f) {
+                    hoverAlpha += 0.1f;
+                } else if (!isHovered && hoverAlpha > 0.0f) {
+                    hoverAlpha -= 0.1f;
+                }
+
+                if (hoverAlpha < 0) hoverAlpha = 0;
+                if (hoverAlpha > 1) hoverAlpha = 1;
+
+                repaint();
+
+                if ((isHovered && hoverAlpha >= 1.0f) || (!isHovered && hoverAlpha <= 0.0f)) {
+                    hoverTimer.stop();
+                }
+            });
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    isHovered = true;
+                    hoverTimer.start();
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    isHovered = false;
+                    hoverTimer.start();
+                }
+            });
         }
 
         @Override
-        public void mouseEntered(MouseEvent e) {
-            if (button != null) {
-                button.setBackground(originalColor.brighter());
-            } else {
-                ((JButton)e.getSource()).setBackground(
-                        ((JButton)e.getSource()).getBackground().brighter());
-            }
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Interpolación de colores para transición suave
+            Color currentColor = interpolateColor(baseColor, hoverColor, hoverAlpha);
+
+            // Gradiente del botón
+            GradientPaint gradient = new GradientPaint(
+                    0, 0, currentColor,
+                    0, getHeight(), currentColor.darker()
+            );
+            g2d.setPaint(gradient);
+
+            // Crear forma redondeada
+            RoundRectangle2D roundRect = new RoundRectangle2D.Float(
+                    0, 0, getWidth(), getHeight(), 12, 12
+            );
+            g2d.fill(roundRect);
+
+            // Efecto de sombra
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+            g2d.setColor(Color.BLACK);
+            g2d.fill(new RoundRectangle2D.Float(2, 2, getWidth(), getHeight(), 12, 12));
+
+            g2d.dispose();
+            super.paintComponent(g);
         }
 
-        @Override
-        public void mouseExited(MouseEvent e) {
-            if (button != null) {
-                button.setBackground(originalColor);
-            } else {
-                ((JButton)e.getSource()).setBackground(
-                        ((JButton)e.getSource()).getBackground().darker());
-            }
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            if (button != null) {
-                button.setBackground(originalColor.darker());
-            }
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            if (button != null) {
-                button.setBackground(originalColor);
-            }
+        private Color interpolateColor(Color c1, Color c2, float fraction) {
+            int red = (int)(c1.getRed() + fraction * (c2.getRed() - c1.getRed()));
+            int green = (int)(c1.getGreen() + fraction * (c2.getGreen() - c1.getGreen()));
+            int blue = (int)(c1.getBlue() + fraction * (c2.getBlue() - c1.getBlue()));
+            return new Color(red, green, blue);
         }
     }
-}
 
-/**
- * Clase utilitaria para constantes de estilo
- * Esta clase debería estar en un archivo separado
- */
-class StyleConstants {
-    // Colores
-    public final Color COLOR_FONDO = new Color(240, 248, 255);           // Azul muy claro
-    public final Color COLOR_HEADER = new Color(173, 216, 230);          // Azul claro
-    public final Color COLOR_BOTON_PRIMARIO = new Color(70, 130, 230);   // Azul más oscuro para mejor contraste
-    public final Color COLOR_BOTON_SECUNDARIO = new Color(100, 180, 230); // Azul cielo medio
-    public final Color COLOR_BOTON_SALIR = new Color(180, 180, 180);     // Gris medio para mejor contraste
-    public final Color COLOR_TEXTO = new Color(25, 25, 112);             // Azul marino oscuro
-
-    // Fuentes
-    public final Font FUENTE_TITULO = new Font("Segoe UI", Font.BOLD, 22);
-    public final Font FUENTE_SUBTITULO = new Font("Segoe UI", Font.PLAIN, 14);
-    public final Font FUENTE_BOTON = new Font("Segoe UI", Font.BOLD, 14);
-
-    // Singleton pattern
-    private static StyleConstants instance;
-
-    private StyleConstants() {
-        // Constructor privado para singleton
-    }
-
-    public static StyleConstants getInstance() {
-        if (instance == null) {
-            instance = new StyleConstants();
-        }
-        return instance;
-    }
 }
