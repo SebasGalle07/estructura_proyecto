@@ -195,6 +195,7 @@ public class PanelModeradorView extends JFrame {
         cardsPanel.add(createActionCard("⭐", "Valorar Contenido", "Asignar calificaciones a contenidos", new Color(255, 107, 129), this::valorarContenido));
         cardsPanel.add(createActionCard("🧬", "Clústeres", "Comunidades de estudiantes conectados", COLOR_WARNING, this::mostrarClusters));
         cardsPanel.add(createActionCard("🧭", "Ruta entre Usuarios", "Encuentra el camino más corto entre dos estudiantes", new Color(108, 92, 231), this::mostrarRutaMasCorta));
+        cardsPanel.add(createActionCard("📥", "Cargar Datos", "Carga rápida de usuarios de ejemplo", COLOR_SUCCESS, this::cargarDatosPrueba));
         return cardsPanel;
     }
 
@@ -938,6 +939,15 @@ public class PanelModeradorView extends JFrame {
         scroll.setBorder(null);
 
         showModernDialog(scroll, "Camino Más Corto Encontrado");
+    }
+
+    private void cargarDatosPrueba() {
+        AppContext.cargarDatosPrueba(true); // Puedes cambiar a false si quieres afinidad real
+        showModernDialog(
+                "Datos de prueba cargados correctamente.\nUsuarios registrados: Kevin, Luis, Ana, Carlos, Santiago, Moderador.\nConexiones: Todos están conectados entre sí.",
+                "Carga Exitosa",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 
 
