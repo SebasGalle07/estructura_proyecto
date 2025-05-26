@@ -10,10 +10,10 @@ public class Usuario {
     private ListaEnlazada<Mensaje> mensajesEnviados;
     private ListaEnlazada<Mensaje> mensajesRecibidos;
 
-    public Usuario(String id, String nombre, ListaEnlazada<String> intereses) {
+    public Usuario(String id, String nombre, ListaEnlazada<String> intereses2) {
         this.id = id;
         this.nombre = nombre;
-        this.intereses = intereses;
+        this.intereses = intereses2;
         this.contenidosPublicados = new ListaEnlazada<>();
         this.conexiones = new ListaEnlazada<>();
         this.historialAcciones = new ListaEnlazada<>();
@@ -64,7 +64,9 @@ public class Usuario {
 
     public void recibirMensaje(Mensaje mensaje) {
         mensajesRecibidos.insertarFinal(mensaje);
-        historialAcciones.insertarFinal("Recibió mensaje de: " + mensaje.getRemitente().getNombre());
+        historialAcciones.insertarFinal(
+    "Recibió mensaje de: " + mensaje.getRemitente().getNombre() + " - \"" + mensaje.getContenido() + "\""
+);
     }
 
     public ListaEnlazada<Mensaje> getMensajesEnviados() {

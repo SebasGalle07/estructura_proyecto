@@ -39,6 +39,8 @@ public class Contenido implements Comparable<Contenido> {
         return (double) suma / cantidad;
     }
 
+    
+
     public String getTitulo() {
         return titulo;
     }
