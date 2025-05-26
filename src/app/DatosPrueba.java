@@ -61,6 +61,7 @@ public class DatosPrueba {
         grafoCtrl.conectarUsuarios(kevin, luis);
         grafoCtrl.conectarUsuarios(luis, ana);
         grafoCtrl.conectarUsuarios(ana, carlos);
+        grafoCtrl.conectarUsuarios(ana, santiago);
 
         // Solicitudes de ayuda
         ayudaCtrl.solicitarAyuda(kevin, "Grafos", 3);

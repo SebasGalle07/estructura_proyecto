@@ -8,7 +8,7 @@ import controller.UsuarioController;
 import model.Usuario;
 import model.Contenido;
 import model.Mensaje;
-import model.ListaEnlazada;
+import model.ListaEnlazada;  
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -82,6 +82,7 @@ public class PanelEstudianteView extends JFrame {
         });
         btnVerContenidos.addActionListener(e -> mostrarContenidos());
 
+        buttonPanel.add(btnVerContenidos);
         buttonPanel.add(btnPublicar);
         buttonPanel.add(btnVerSugerencias);
         buttonPanel.add(btnSolicitarAyuda);
@@ -90,7 +91,6 @@ public class PanelEstudianteView extends JFrame {
         buttonPanel.add(btnHistorial);
         buttonPanel.add(btnValorarContenido);
         buttonPanel.add(btnSalir);
-        buttonPanel.add(btnVerContenidos);
 
         mainPanel.add(titlePanel, BorderLayout.NORTH);
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
