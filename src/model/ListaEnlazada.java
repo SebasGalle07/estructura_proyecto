@@ -1,6 +1,8 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class ListaEnlazada<T> implements Iterable<T> {
     private NodoLista<T> cabeza;
@@ -100,6 +102,15 @@ public class ListaEnlazada<T> implements Iterable<T> {
             contador++;
         }
         return null;
+    }
+    public List<T> toList() {
+        List<T> lista = new ArrayList<>();
+        NodoLista<T> actual = cabeza;
+        while (actual != null) {
+            lista.add(actual.dato);
+            actual = actual.siguiente;
+        }
+        return lista;
     }
 
 }

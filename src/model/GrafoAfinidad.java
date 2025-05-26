@@ -164,4 +164,50 @@ public class GrafoAfinidad {
 
         return resultado;
     }
+    // 🔵 NUEVO: Detectar clústeres (comunidades de estudio)
+    public ListaEnlazada<ListaEnlazada<Usuario>> detectarClusters() {
+        ListaEnlazada<ListaEnlazada<Usuario>> clusters = new ListaEnlazada<>();
+        ListaEnlazada<String> visitados = new ListaEnlazada<>();
+
+        NodoLista<Pair<String, Vertice>> actual = vertices.getCabeza();
+
+        while (actual != null) {
+            String id = actual.getDato().getKey();
+            if (!visitados.contiene(id)) {
+                ListaEnlazada<Usuario> cluster = new ListaEnlazada<>();
+                explorarCluster(id, visitados, cluster);
+                if (!cluster.estaVacia()) {
+                    clusters.insertarFinal(cluster);
+                }
+            }
+            actual = actual.getSiguiente();
+        }
+
+        return clusters;
+    }
+
+    private void explorarCluster(String idInicio, ListaEnlazada<String> visitados, ListaEnlazada<Usuario> cluster) {
+        Cola<String> cola = new Cola<>();
+        cola.encolar(idInicio);
+        visitados.insertarFinal(idInicio);
+
+        while (!cola.estaVacia()) {
+            String actualId = cola.desencolar();
+            Vertice actual = buscarVertice(actualId);
+            if (actual == null) continue;
+
+            cluster.insertarFinal(actual.getUsuario());
+
+            NodoLista<Vertice> nodo = actual.getConexiones().getCabeza();
+            while (nodo != null) {
+                String vecinoId = nodo.getDato().getUsuario().getId();
+                if (!visitados.contiene(vecinoId)) {
+                    visitados.insertarFinal(vecinoId);
+                    cola.encolar(vecinoId);
+                }
+                nodo = nodo.getSiguiente();
+            }
+        }
+    }
+
 }

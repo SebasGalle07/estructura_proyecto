@@ -193,7 +193,8 @@ public class PanelModeradorView extends JFrame {
         cardsPanel.add(createActionCard("📊", "Grafo Textual", "Visualización textual del grafo", COLOR_SECUNDARIO, this::mostrarGrafoTexto));
         cardsPanel.add(createActionCard("🎨", "Grafo Visual", "Representación gráfica del grafo", new Color(129, 236, 236), () -> new GrafoView().setVisible(true)));
         cardsPanel.add(createActionCard("⭐", "Valorar Contenido", "Asignar calificaciones a contenidos", new Color(255, 107, 129), this::valorarContenido));
-
+        cardsPanel.add(createActionCard("🧬", "Clústeres", "Comunidades de estudiantes conectados", COLOR_WARNING, this::mostrarClusters));
+        cardsPanel.add(createActionCard("🧭", "Ruta entre Usuarios", "Encuentra el camino más corto entre dos estudiantes", new Color(108, 92, 231), this::mostrarRutaMasCorta));
         return cardsPanel;
     }
 
@@ -823,5 +824,121 @@ public class PanelModeradorView extends JFrame {
             }
         }
     }
+    private void mostrarClusters() {
+        model.ListaEnlazada<model.ListaEnlazada<Usuario>> clusters = grafoController.detectarClusters();
+
+        if (clusters.estaVacia()) {
+            showModernDialog("No se encontraron comunidades activas en el grafo.", "Sin Clústeres", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(COLOR_BACKGROUND);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel titulo = new JLabel("🔍 Comunidades de Estudio Detectadas");
+        titulo.setFont(FONT_CARD_TITLE);
+        titulo.setForeground(COLOR_TEXT_PRIMARY);
+        panel.add(titulo, BorderLayout.NORTH);
+
+        JPanel clustersPanel = new JPanel();
+        clustersPanel.setLayout(new BoxLayout(clustersPanel, BoxLayout.Y_AXIS));
+        clustersPanel.setBackground(COLOR_BACKGROUND);
+
+        int grupo = 1;
+        for (model.ListaEnlazada<Usuario> comunidad : clusters) {
+            JPanel grupoPanel = new RoundedPanel(10);
+            grupoPanel.setBackground(COLOR_CARD);
+            grupoPanel.setLayout(new BoxLayout(grupoPanel, BoxLayout.Y_AXIS));
+            grupoPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+
+            JLabel grupoLabel = new JLabel("📘 Clúster #" + grupo);
+            grupoLabel.setFont(FONT_CARD_TITLE);
+            grupoLabel.setForeground(COLOR_TEXT_PRIMARY);
+            grupoPanel.add(grupoLabel);
+
+            for (Usuario u : comunidad) {
+                JLabel miembro = new JLabel("👤 " + u.getNombre() + " (ID: " + u.getId() + ")");
+                miembro.setFont(FONT_CARD_DESC);
+                miembro.setForeground(COLOR_TEXT_SECONDARY);
+                grupoPanel.add(miembro);
+            }
+
+            clustersPanel.add(grupoPanel);
+            clustersPanel.add(Box.createVerticalStrut(15));
+            grupo++;
+        }
+
+        JScrollPane scroll = new JScrollPane(clustersPanel);
+        scroll.setPreferredSize(new Dimension(500, 400));
+        scroll.setBorder(null);
+
+        panel.add(scroll, BorderLayout.CENTER);
+
+        showModernDialog(panel, "Comunidades de Estudio");
+    }
+
+    private void mostrarRutaMasCorta() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(COLOR_BACKGROUND);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel titulo = new JLabel("🧭 Buscar Ruta Más Corta Entre Estudiantes");
+        titulo.setFont(FONT_CARD_TITLE);
+        titulo.setForeground(COLOR_TEXT_PRIMARY);
+        panel.add(titulo, BorderLayout.NORTH);
+
+        JPanel campos = new JPanel(new GridLayout(2, 2, 10, 10));
+        campos.setOpaque(false);
+
+        JTextField campoOrigen = new JTextField();
+        JTextField campoDestino = new JTextField();
+
+        campos.add(new JLabel("ID del estudiante origen:", SwingConstants.RIGHT));
+        campos.add(campoOrigen);
+        campos.add(new JLabel("ID del estudiante destino:", SwingConstants.RIGHT));
+        campos.add(campoDestino);
+
+        panel.add(campos, BorderLayout.CENTER);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Buscar Ruta Corta", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result != JOptionPane.OK_OPTION) return;
+
+        String idOrigen = campoOrigen.getText().trim();
+        String idDestino = campoDestino.getText().trim();
+
+        if (idOrigen.isEmpty() || idDestino.isEmpty()) {
+            showModernDialog("Debe ingresar ambos ID de usuario", "Campos Incompletos", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        model.ListaEnlazada<Usuario> camino = grafoController.caminoMasCorto(idOrigen, idDestino);
+        if (camino == null || camino.estaVacia()) {
+            showModernDialog("No se encontró un camino entre los estudiantes", "Ruta No Disponible", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // Mostrar la ruta
+        JPanel rutaPanel = new JPanel();
+        rutaPanel.setLayout(new BoxLayout(rutaPanel, BoxLayout.Y_AXIS));
+        rutaPanel.setBackground(COLOR_BACKGROUND);
+        rutaPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        int paso = 1;
+        for (Usuario u : camino) {
+            JLabel pasoLabel = new JLabel("Paso " + paso + ": " + u.getNombre() + " (ID: " + u.getId() + ")");
+            pasoLabel.setFont(FONT_CARD_DESC);
+            pasoLabel.setForeground(COLOR_TEXT_PRIMARY);
+            rutaPanel.add(pasoLabel);
+            paso++;
+        }
+
+        JScrollPane scroll = new JScrollPane(rutaPanel);
+        scroll.setPreferredSize(new Dimension(400, 250));
+        scroll.setBorder(null);
+
+        showModernDialog(scroll, "Camino Más Corto Encontrado");
+    }
+
 
 }

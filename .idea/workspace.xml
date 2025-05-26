@@ -6,19 +6,32 @@
   <component name="ChangeListManager">
     <list default="true" id="fcd9cec6-7667-44aa-875c-8a2d9055d349" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/app.zip" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/app.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/controller.zip" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/controller.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/model.zip" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/model.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/model/ListaEnlazada.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/model/ListaEnlazada.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view.zip" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$3.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$4.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$5.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$6.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$6.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$7.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$7.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$GradientPanel.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView$GradientPanel.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelEstudianteView.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelModeradorView$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelModeradorView$4.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelModeradorView.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/PanelModeradorView.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$2.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$GradientPanel.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$GradientPanel.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$ModernButton$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$ModernButton$1.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$ModernButton.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$ModernButton.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$ModernTextField$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$ModernTextField$1.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$ModernTextField.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView$ModernTextField.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/estructura_proyecto/view/RegistroView.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/controller/UsuarioController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/UsuarioController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app.zip" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controller.zip" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controller/GrafoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/GrafoController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model.zip" beforeDir="false" afterPath="$PROJECT_DIR$/src/model.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/GrafoAfinidad.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/GrafoAfinidad.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/ListaEnlazada.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ListaEnlazada.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/view.zip" beforeDir="false" afterPath="$PROJECT_DIR$/src/view.zip" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/view/PanelEstudianteView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/view/PanelEstudianteView.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/view/PanelModeradorView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/view/PanelModeradorView.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/view/RegistroView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/view/RegistroView.java" afterDir="false" />
@@ -69,7 +82,7 @@
       <option name="presentableId" value="Default" />
       <updated>1748270362730</updated>
       <workItem from="1748270362734" duration="277000" />
-      <workItem from="1748270877122" duration="15548000" />
+      <workItem from="1748270877122" duration="19634000" />
     </task>
     <servers />
   </component>

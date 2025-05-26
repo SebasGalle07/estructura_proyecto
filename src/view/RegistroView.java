@@ -44,7 +44,7 @@ public class RegistroView extends JFrame {
 
     private void setupFrame() {
         setTitle("Registro de Usuario");
-        setSize(600, 550);
+        setSize(700, 800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
@@ -161,7 +161,6 @@ public class RegistroView extends JFrame {
         form.setOpaque(false);
         form.setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 20));
 
-        // ✅ Asignación directa a las variables globales
         txtId = createModernField("ID de Usuario", "Ingresa tu ID único");
         txtNombre = createModernField("Nombre Completo", "Tu nombre completo");
         txtIntereses = createModernField("Intereses", "Separados por coma (ej: música, deportes)");

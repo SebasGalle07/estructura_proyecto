@@ -186,9 +186,106 @@ public class PanelEstudianteView extends JFrame {
                     new MainView().setVisible(true);
                     dispose();
                 }));
+        cardsPanel.add(createFeatureCard("🤝", "Grupos de Estudio", "Únete a grupos con intereses comunes",
+                COLOR_SECUNDARIO, e -> mostrarGruposDeEstudio()));
+        cardsPanel.add(createFeatureCard("🔍", "Buscar Contenidos", "Filtra por tema, autor o tipo", COLOR_PRIMARIO, e -> buscarContenidos()));
 
         mainPanel.add(cardsPanel, BorderLayout.CENTER);
         return mainPanel;
+    }
+    private void mostrarGruposDeEstudio() {
+        List<Usuario> todos = AppContext.usuarioController.getTodos().toList();
+        List<String> temas = usuario.getIntereses().toList();
+        List<model.GrupoEstudio> grupos = AppContext.grupoEstudioController.agruparPorInteres(todos, temas);
+
+        if (grupos == null || grupos.isEmpty()) {
+            mostrarMensajeModerno("Grupos de Estudio", "No se encontraron grupos disponibles con tus intereses.", COLOR_ADVERTENCIA);
+            return;
+        }
+
+        JPanel panel = new JPanel(new BorderLayout(0, 15));
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
+
+        JLabel titulo = new JLabel("🤝 Grupos Sugeridos");
+        titulo.setFont(FUENTE_TITULO);
+        titulo.setForeground(COLOR_TEXTO);
+        titulo.setHorizontalAlignment(SwingConstants.CENTER);
+        panel.add(titulo, BorderLayout.NORTH);
+
+        JPanel gruposPanel = new JPanel();
+        gruposPanel.setLayout(new BoxLayout(gruposPanel, BoxLayout.Y_AXIS));
+        gruposPanel.setOpaque(false);
+
+        for (model.GrupoEstudio grupo : grupos) {
+            // ✅ Conectar a todos los integrantes entre sí
+            List<Usuario> integrantes = grupo.getIntegrantes().toList();
+            for (int i = 0; i < integrantes.size(); i++) {
+                for (int j = i + 1; j < integrantes.size(); j++) {
+                    Usuario a = integrantes.get(i);
+                    Usuario b = integrantes.get(j);
+                    if (!a.getConexiones().contiene(b)) {
+                        AppContext.grafoController.agregarUsuario(a);
+                        AppContext.grafoController.agregarUsuario(b);
+                        AppContext.grafoController.conectarUsuarios(a, b);
+                    }
+                }
+            }
+
+            JPanel grupoCard = new JPanel(new BorderLayout(0, 10)) {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2d = (Graphics2D) g.create();
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2d.setColor(new Color(0, 0, 0, 30));
+                    g2d.fillRoundRect(3, 3, getWidth()-3, getHeight()-3, 15, 15);
+                    g2d.setColor(COLOR_FONDO_CLARO);
+                    g2d.fillRoundRect(0, 0, getWidth()-3, getHeight()-3, 15, 15);
+                    g2d.setColor(COLOR_PRIMARIO);
+                    g2d.setStroke(new BasicStroke(1f));
+                    g2d.drawRoundRect(1, 1, getWidth()-5, getHeight()-5, 15, 15);
+                    g2d.dispose();
+                }
+            };
+            grupoCard.setOpaque(false);
+            grupoCard.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+
+            JLabel lblTema = new JLabel("📚 Tema: " + grupo.getTema());
+            lblTema.setFont(new Font("Segoe UI", Font.BOLD, 16));
+            lblTema.setForeground(COLOR_TEXTO);
+
+            JPanel integrantesPanel = new JPanel();
+            integrantesPanel.setLayout(new BoxLayout(integrantesPanel, BoxLayout.Y_AXIS));
+            integrantesPanel.setOpaque(false);
+            integrantesPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+
+            for (Usuario integrante : integrantes) {
+                JLabel miembro = new JLabel("👤 " + integrante.getNombre() + " (ID: " + integrante.getId() + ")");
+                miembro.setFont(FUENTE_CAMPO);
+                miembro.setForeground(COLOR_TEXTO_SECUNDARIO);
+                integrantesPanel.add(miembro);
+            }
+
+            grupoCard.add(lblTema, BorderLayout.NORTH);
+            grupoCard.add(integrantesPanel, BorderLayout.CENTER);
+
+            gruposPanel.add(grupoCard);
+            gruposPanel.add(Box.createVerticalStrut(15));
+        }
+
+        JScrollPane scrollPane = new JScrollPane(gruposPanel);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(600, 400));
+
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton btnCerrar = createModernButton("Cerrar", COLOR_PRIMARIO);
+        btnCerrar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+        panel.add(btnCerrar, BorderLayout.SOUTH);
+
+        createModernDialog("Grupos de Estudio", panel).setVisible(true);
     }
 
     private JPanel createFeatureCard(String icon, String title, String description, Color accentColor, ActionListener action) {
@@ -496,9 +593,6 @@ public class PanelEstudianteView extends JFrame {
 
         return panel;
     }
-
-
-
 
     private void mostrarMensajeModerno(String titulo, String mensaje, Color color) {
         JPanel panel = new JPanel(new BorderLayout(0, 15));
@@ -992,7 +1086,6 @@ public class PanelEstudianteView extends JFrame {
         panel.add(titulo);
         panel.add(Box.createVerticalStrut(20));
 
-        // ComboBox con todos los contenidos disponibles
         String[] opciones = new String[contenidos.tamano()];
         int i = 0;
         for (Contenido c : contenidos) {
@@ -1043,11 +1136,15 @@ public class PanelEstudianteView extends JFrame {
                         usuario
                 );
 
-                Usuario autor = AppContext.usuarioController.buscarUsuario(seleccionado.getAutor());
-                if (autor != null && !autor.getId().equals(usuario.getId())) {
-                    AppContext.grafoController.agregarUsuario(usuario);
-                    AppContext.grafoController.agregarUsuario(autor);
-                    AppContext.grafoController.conectarUsuarios(usuario, autor);
+                // ✅ Conectar con los demás usuarios que ya valoraron este contenido
+                ListaEnlazada<Usuario> todos = AppContext.usuarioController.getTodos();
+                for (Usuario otro : todos) {
+                    if (!otro.getId().equals(usuario.getId()) &&
+                            otro.getContenidosPublicados().contiene(seleccionado)) {
+                        AppContext.grafoController.agregarUsuario(usuario);
+                        AppContext.grafoController.agregarUsuario(otro);
+                        AppContext.grafoController.conectarUsuarios(usuario, otro);
+                    }
                 }
 
                 mostrarMensajeModerno("Éxito", "Valoración registrada con éxito", COLOR_EXITO);
@@ -1068,8 +1165,107 @@ public class PanelEstudianteView extends JFrame {
 
         createModernDialog("Valorar Contenido", panel).setVisible(true);
     }
+    private void buscarContenidos() {
+        ListaEnlazada<Contenido> contenidos = AppContext.contenidoController.obtenerTodosLosContenidos();
 
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
 
+        JLabel titulo = new JLabel("🔍 Buscar Contenidos");
+        titulo.setFont(FUENTE_TITULO);
+        titulo.setForeground(COLOR_TEXTO);
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titulo);
+        panel.add(Box.createVerticalStrut(20));
+
+        JTextField txtBuscar = createModernTextField("");
+        String[] opciones = {"Tema", "Autor", "Tipo"};
+        JComboBox<String> filtro = new JComboBox<>(opciones);
+        filtro.setFont(FUENTE_CAMPO);
+        filtro.setMaximumSize(new Dimension(200, 40));
+        filtro.setBackground(COLOR_FONDO_CLARO);
+        filtro.setForeground(COLOR_TEXTO);
+
+        panel.add(crearCampoConEtiqueta("Texto a buscar:", txtBuscar));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(crearCampoConEtiqueta("Filtrar por:", filtro));
+        panel.add(Box.createVerticalStrut(20));
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        buttonPanel.setOpaque(false);
+        JButton btnBuscar = createModernButton("Buscar", COLOR_PRIMARIO);
+        JButton btnCancelar = createModernButton("Cancelar", COLOR_ERROR);
+
+        btnBuscar.addActionListener(e -> {
+            String texto = txtBuscar.getText().trim().toLowerCase();
+            String campo = filtro.getSelectedItem().toString();
+
+            if (texto.isEmpty()) {
+                mostrarMensajeModerno("Error", "Ingrese un texto para buscar", COLOR_ERROR);
+                return;
+            }
+
+            ListaEnlazada<Contenido> filtrados = new ListaEnlazada<>();
+            for (Contenido c : contenidos) {
+                if ((campo.equals("Tema") && c.getTema().toLowerCase().contains(texto)) ||
+                        (campo.equals("Autor") && c.getAutor().toLowerCase().contains(texto)) ||
+                        (campo.equals("Tipo") && c.getTipo().toLowerCase().contains(texto))) {
+                    filtrados.insertarFinal(c);
+                }
+            }
+
+            if (filtrados.estaVacia()) {
+                mostrarMensajeModerno("Sin Resultados", "No se encontraron contenidos con esos criterios.", COLOR_ADVERTENCIA);
+            } else {
+                mostrarContenidosFiltrados(filtrados);
+            }
+            SwingUtilities.getWindowAncestor(panel).dispose();
+        });
+
+        btnCancelar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+
+        buttonPanel.add(btnBuscar);
+        buttonPanel.add(btnCancelar);
+        panel.add(buttonPanel);
+
+        createModernDialog("Buscar Contenidos", panel).setVisible(true);
+    }
+    private void mostrarContenidosFiltrados(ListaEnlazada<Contenido> contenidos) {
+        JPanel panel = new JPanel(new BorderLayout(0, 15));
+        panel.setOpaque(false);
+
+        JLabel titulo = new JLabel("📑 Resultados de Búsqueda");
+        titulo.setFont(FUENTE_TITULO);
+        titulo.setForeground(COLOR_TEXTO);
+        titulo.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JPanel resultadosPanel = new JPanel();
+        resultadosPanel.setLayout(new BoxLayout(resultadosPanel, BoxLayout.Y_AXIS));
+        resultadosPanel.setOpaque(false);
+
+        for (Contenido contenido : contenidos) {
+            JPanel card = createContentCard(contenido);
+            resultadosPanel.add(card);
+            resultadosPanel.add(Box.createVerticalStrut(10));
+        }
+
+        JScrollPane scrollPane = new JScrollPane(resultadosPanel);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(600, 400));
+
+        panel.add(titulo, BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton btnCerrar = createModernButton("Cerrar", COLOR_PRIMARIO);
+        btnCerrar.addActionListener(e -> SwingUtilities.getWindowAncestor(panel).dispose());
+        panel.add(btnCerrar, BorderLayout.SOUTH);
+
+        createModernDialog("Resultados", panel).setVisible(true);
+    }
 
 
     @Override
