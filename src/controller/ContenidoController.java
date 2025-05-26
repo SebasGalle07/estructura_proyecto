@@ -64,4 +64,21 @@ public class ContenidoController {
         }
         return resultado;
     }
+    public Contenido buscarContenidoPorId(int idContenido) {
+        ListaEnlazada<Contenido> todos = arbol.inOrden(); 
+        for (Contenido contenido : todos) {
+            if (contenido.getId() == idContenido) {
+                return contenido;
+            }
+        }
+        return null; 
+    }
+    public void valorarContenido(String idContenido, int valoracion, Usuario usuario) {
+        Contenido contenido = buscarContenidoPorId(Integer.parseInt(idContenido));
+        if (contenido != null) {
+            contenido.agregarValoracion(valoracion);
+        } else {
+            throw new IllegalArgumentException("El contenido con ID " + idContenido + " no existe.");
+        }
+    }
 }

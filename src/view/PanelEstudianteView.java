@@ -81,6 +81,7 @@ public class PanelEstudianteView extends JFrame {
             dispose();
         });
         btnVerContenidos.addActionListener(e -> mostrarContenidos());
+        btnValorarContenido.addActionListener(e -> valorarContenido());
 
         buttonPanel.add(btnVerContenidos);
         buttonPanel.add(btnPublicar);
@@ -487,5 +488,81 @@ public class PanelEstudianteView extends JFrame {
         JOptionPane.showMessageDialog(this, panel, "Contenidos Publicados",
                 JOptionPane.PLAIN_MESSAGE);
     }
-    
+
+    private void valorarContenido() {
+        JPanel panel = new JPanel(new BorderLayout(0, 10));
+        panel.setBackground(COLOR_FONDO);
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Campo para ingresar el ID del contenido
+        JPanel idPanel = createFieldPanel("ID del contenido a valorar:");
+        panel.add(idPanel, BorderLayout.NORTH);
+
+        JTextField txtIdContenido = (JTextField) ((JPanel) idPanel.getComponent(1)).getComponent(0);
+
+        // Mostrar cuadro de diálogo para ingresar el ID del contenido
+        int result = JOptionPane.showConfirmDialog(this, panel, "Buscar Contenido",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result != JOptionPane.OK_OPTION) return;
+
+        String idContenido = txtIdContenido.getText().trim();
+        if (idContenido.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor ingrese el ID del contenido",
+                    "Campo requerido", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            // Buscar el contenido por ID
+            Contenido contenido = AppContext.contenidoController.buscarContenidoPorId(Integer.parseInt(idContenido));
+            if (contenido == null) {
+                JOptionPane.showMessageDialog(this,
+                        "No se encontró un contenido con el ID proporcionado",
+                        "Contenido no encontrado", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Crear un panel para ingresar la valoración
+            JPanel valoracionPanel = new JPanel(new BorderLayout(0, 10));
+            valoracionPanel.setBackground(COLOR_FONDO);
+            valoracionPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+            JLabel lblValoracion = new JLabel("Ingrese una valoración (1-5):");
+            lblValoracion.setFont(FUENTE_ETIQUETA);
+            lblValoracion.setForeground(COLOR_TEXTO);
+            valoracionPanel.add(lblValoracion, BorderLayout.NORTH);
+
+            JTextField txtValoracion = new JTextField();
+            valoracionPanel.add(txtValoracion, BorderLayout.CENTER);
+
+            // Mostrar cuadro de diálogo para ingresar la valoración
+            result = JOptionPane.showConfirmDialog(this, valoracionPanel, "Valorar Contenido",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (result != JOptionPane.OK_OPTION) return;
+
+            String valoracionStr = txtValoracion.getText().trim();
+            if (valoracionStr.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Por favor ingrese una valoración",
+                        "Campo requerido", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int valoracion = Integer.parseInt(valoracionStr);
+            if (valoracion < 1 || valoracion > 5) {
+                JOptionPane.showMessageDialog(this, "La valoración debe estar entre 1 y 5",
+                        "Valoración inválida", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Registrar la valoración en el contenido
+            AppContext.contenidoController.valorarContenido(idContenido, valoracion, usuario);
+            JOptionPane.showMessageDialog(this, "Contenido valorado con éxito.");
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "La valoración debe ser un número entre 1 y 5",
+                    "Formato inválido", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 }
