@@ -1,12 +1,12 @@
 package view;
 
 import app.AppContext;
+import model.ListaEnlazada;
+import model.Usuario;
+
 import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.RoundRectangle2D;
-import java.util.Arrays;
 
 public class RegistroView extends JFrame {
 
@@ -32,6 +32,9 @@ public class RegistroView extends JFrame {
 
     private Timer animationTimer;
     private float animationProgress = 0f;
+    private ModernTextField txtId;
+    private ModernTextField txtNombre;
+    private ModernTextField txtIntereses;
 
     public RegistroView() {
         setupFrame();
@@ -158,10 +161,10 @@ public class RegistroView extends JFrame {
         form.setOpaque(false);
         form.setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 20));
 
-        // Campos del formulario
-        ModernTextField txtId = createModernField("ID de Usuario", "Ingresa tu ID único");
-        ModernTextField txtNombre = createModernField("Nombre Completo", "Tu nombre completo");
-        ModernTextField txtIntereses = createModernField("Intereses", "Separados por coma (ej: música, deportes)");
+        // ✅ Asignación directa a las variables globales
+        txtId = createModernField("ID de Usuario", "Ingresa tu ID único");
+        txtNombre = createModernField("Nombre Completo", "Tu nombre completo");
+        txtIntereses = createModernField("Intereses", "Separados por coma (ej: música, deportes)");
 
         form.add(createFieldContainer("📋 ID de Usuario", txtId));
         form.add(Box.createVerticalStrut(20));
@@ -171,6 +174,8 @@ public class RegistroView extends JFrame {
 
         return form;
     }
+
+
 
     private JPanel createFieldContainer(String labelText, ModernTextField field) {
         JPanel container = new JPanel(new BorderLayout(0, 8));
@@ -198,24 +203,44 @@ public class RegistroView extends JFrame {
         ModernButton btnRegistrar = new ModernButton("Registrar", COLOR_PRIMARIO, COLOR_SECUNDARIO);
         ModernButton btnVolver = new ModernButton("Volver", COLOR_FONDO_CLARO, COLOR_TARJETA);
 
-        // Lógica de los botones (simplificada para el ejemplo)
         btnRegistrar.addActionListener(e -> {
-            // Aquí iría la lógica de registro
-            JOptionPane.showMessageDialog(this, "Funcionalidad de registro implementada",
-                    "Info", JOptionPane.INFORMATION_MESSAGE);
+            String id = txtId.getText().trim();
+            String nombre = txtNombre.getText().trim();
+            String interesesTexto = txtIntereses.getText().trim();
+
+            if (id.isEmpty() || nombre.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Convertir la cadena de intereses en una ListaEnlazada
+            ListaEnlazada<String> intereses = new ListaEnlazada<>();
+            for (String interes : interesesTexto.split(",")) {
+                intereses.insertarFinal(interes.trim());
+            }
+
+            boolean exito = AppContext.usuarioController.registrarUsuario(id, nombre, intereses);
+
+            if (exito) {
+                JOptionPane.showMessageDialog(this, "Registro exitoso. Ahora puedes iniciar sesión.");
+                new LoginView().setVisible(true);
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "El ID ya está en uso. Usa otro.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         btnVolver.addActionListener(e -> {
             new MainView().setVisible(true);
-            dispose();
+            dispose(); // Cierra esta ventana
         });
-
 
         buttonPanel.add(btnVolver);
         buttonPanel.add(btnRegistrar);
 
         return buttonPanel;
     }
+
 
     private void startEntryAnimation() {
         animationTimer = new Timer(16, e -> {

@@ -482,7 +482,7 @@ public class PanelEstudianteView extends JFrame {
 
         createModernDialog("Publicar Contenido", panel).setVisible(true);
     }
-    private JPanel crearCampoConEtiqueta(String texto, JTextField campo) {
+    private JPanel crearCampoConEtiqueta(String texto, JComponent componente) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(0, 5));
         panel.setOpaque(false);
@@ -490,11 +490,13 @@ public class PanelEstudianteView extends JFrame {
         JLabel label = new JLabel(texto);
         label.setFont(FUENTE_ETIQUETA);
         label.setForeground(COLOR_TEXTO);
+
         panel.add(label, BorderLayout.NORTH);
-        panel.add(campo, BorderLayout.CENTER);
+        panel.add(componente, BorderLayout.CENTER);
 
         return panel;
     }
+
 
 
 
@@ -970,8 +972,14 @@ public class PanelEstudianteView extends JFrame {
         card.add(infoPanel, BorderLayout.CENTER);
         return card;
     }
-
     private void valorarContenido() {
+        ListaEnlazada<Contenido> contenidos = AppContext.contenidoController.obtenerTodosLosContenidos();
+
+        if (contenidos.estaVacia()) {
+            mostrarMensajeModerno("Información", "No hay contenidos disponibles para valorar.", COLOR_ADVERTENCIA);
+            return;
+        }
+
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setOpaque(false);
@@ -984,10 +992,26 @@ public class PanelEstudianteView extends JFrame {
         panel.add(titulo);
         panel.add(Box.createVerticalStrut(20));
 
-        JTextField txtIdContenido = createModernTextField("");
+        // ComboBox con todos los contenidos disponibles
+        String[] opciones = new String[contenidos.tamano()];
+        int i = 0;
+        for (Contenido c : contenidos) {
+            opciones[i++] = c.getTitulo() + " - por " + c.getAutor();
+        }
+
+        JComboBox<String> comboContenidos = new JComboBox<>(opciones);
+        comboContenidos.setFont(FUENTE_CAMPO);
+        comboContenidos.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        comboContenidos.setBackground(COLOR_FONDO_CLARO);
+        comboContenidos.setForeground(COLOR_TEXTO);
+        comboContenidos.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 221, 225)),
+                BorderFactory.createEmptyBorder(10, 12, 10, 12)
+        ));
+
         JTextField txtValoracion = createModernTextField("");
 
-        panel.add(crearCampoConEtiqueta("ID del contenido:", txtIdContenido));
+        panel.add(crearCampoConEtiqueta("Seleccione el contenido:", comboContenidos));
         panel.add(Box.createVerticalStrut(10));
         panel.add(crearCampoConEtiqueta("Valoración (1-5):", txtValoracion));
         panel.add(Box.createVerticalStrut(20));
@@ -998,44 +1022,39 @@ public class PanelEstudianteView extends JFrame {
         JButton btnCancelar = createModernButton("Cancelar", COLOR_ERROR);
 
         btnValorar.addActionListener(e -> {
-            String idContenido = txtIdContenido.getText().trim();
             String valoracionStr = txtValoracion.getText().trim();
-
-            if (idContenido.isEmpty() || valoracionStr.isEmpty()) {
-                mostrarMensajeModerno("Error", "Todos los campos son obligatorios", COLOR_ERROR);
+            if (valoracionStr.isEmpty()) {
+                mostrarMensajeModerno("Error", "Ingrese una valoración del 1 al 5", COLOR_ERROR);
                 return;
             }
 
             try {
-                int id = Integer.parseInt(idContenido);
                 int valoracion = Integer.parseInt(valoracionStr);
-
                 if (valoracion < 1 || valoracion > 5) {
                     mostrarMensajeModerno("Error", "La valoración debe estar entre 1 y 5", COLOR_ERROR);
                     return;
                 }
 
-                Contenido contenido = AppContext.contenidoController.buscarContenidoPorId(id);
-                if (contenido == null) {
-                    mostrarMensajeModerno("Error", "No se encontró un contenido con el ID proporcionado", COLOR_ERROR);
-                    return;
-                }
+                Contenido seleccionado = contenidos.get(comboContenidos.getSelectedIndex());
 
-                AppContext.contenidoController.valorarContenido(idContenido, valoracion, usuario);
+                AppContext.contenidoController.valorarContenido(
+                        String.valueOf(seleccionado.getId()),
+                        valoracion,
+                        usuario
+                );
 
-                // Conexión automática con el autor
-                Usuario autor = AppContext.usuarioController.buscarUsuario(contenido.getAutor());
+                Usuario autor = AppContext.usuarioController.buscarUsuario(seleccionado.getAutor());
                 if (autor != null && !autor.getId().equals(usuario.getId())) {
-                    grafoController.agregarUsuario(usuario);
-                    grafoController.agregarUsuario(autor);
-                    grafoController.conectarUsuarios(usuario, autor);
+                    AppContext.grafoController.agregarUsuario(usuario);
+                    AppContext.grafoController.agregarUsuario(autor);
+                    AppContext.grafoController.conectarUsuarios(usuario, autor);
                 }
 
-                mostrarMensajeModerno("Éxito", "Contenido valorado con éxito", COLOR_EXITO);
+                mostrarMensajeModerno("Éxito", "Valoración registrada con éxito", COLOR_EXITO);
                 SwingUtilities.getWindowAncestor(panel).dispose();
 
             } catch (NumberFormatException ex) {
-                mostrarMensajeModerno("Error", "Por favor ingrese valores numéricos válidos", COLOR_ERROR);
+                mostrarMensajeModerno("Error", "Por favor ingrese un número válido", COLOR_ERROR);
             } catch (Exception ex) {
                 mostrarMensajeModerno("Error", "Error: " + ex.getMessage(), COLOR_ERROR);
             }
@@ -1049,6 +1068,8 @@ public class PanelEstudianteView extends JFrame {
 
         createModernDialog("Valorar Contenido", panel).setVisible(true);
     }
+
+
 
 
     @Override

@@ -659,110 +659,38 @@ public class PanelModeradorView extends JFrame {
     }
 
     private void valorarContenido() {
-        // Implementación mejorada del diálogo de valoración con el nuevo estilo
-        // Mantiene la misma lógica pero con componentes visuales modernos
+        model.ListaEnlazada<Contenido> contenidos = contenidoController.obtenerTodosLosContenidos();
 
-        JPanel panel = new JPanel(new BorderLayout(0, 15));
-        panel.setBackground(COLOR_BACKGROUND);
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel titulo = new JLabel("⭐ Valorar Contenido");
-        titulo.setFont(FONT_CARD_TITLE);
-        titulo.setForeground(COLOR_TEXT_PRIMARY);
-        panel.add(titulo, BorderLayout.NORTH);
-
-        JPanel formPanel = new JPanel(new BorderLayout(0, 10));
-        formPanel.setBackground(COLOR_BACKGROUND);
-
-        JLabel label = new JLabel("ID del autor del contenido:");
-        label.setFont(FONT_CARD_DESC);
-        label.setForeground(COLOR_TEXT_SECONDARY);
-
-        JTextField txtId = new JTextField();
-        txtId.setFont(FONT_CARD_DESC);
-        txtId.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 221, 225)),
-                BorderFactory.createEmptyBorder(10, 12, 10, 12)
-        ));
-
-        formPanel.add(label, BorderLayout.NORTH);
-        formPanel.add(txtId, BorderLayout.CENTER);
-
-        panel.add(formPanel, BorderLayout.CENTER);
-
-        int result = JOptionPane.showConfirmDialog(this, panel, "Buscar Autor",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (result != JOptionPane.OK_OPTION) return;
-
-        String idUsuario = txtId.getText().trim();
-        if (idUsuario.isEmpty()) {
-            showModernDialog("Por favor ingrese el ID del autor", "Campo Requerido", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        Usuario autor = usuarioController.buscarUsuario(idUsuario);
-        if (autor == null) {
-            showModernDialog("No se encontró un usuario con el ID proporcionado", "Usuario No Encontrado", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        model.ListaEnlazada<Contenido> contenidos = autor.getContenidosPublicados();
         if (contenidos.estaVacia()) {
-            showModernDialog("Este usuario no ha publicado contenidos", "Sin Contenidos", JOptionPane.INFORMATION_MESSAGE);
+            showModernDialog("No hay contenidos disponibles para valorar", "Sin Contenidos", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
-        // Crear diálogo de selección de contenido
-        int size = contenidos.tamano();
-        String[] titulos = new String[size];
+        // Convertir a arreglo de títulos con autor incluido
+        String[] opciones = new String[contenidos.tamano()];
         int index = 0;
         for (Contenido c : contenidos) {
-            titulos[index++] = c.getTitulo();
+            opciones[index++] = c.getTitulo() + " - por " + c.getAutor();
         }
 
-        JPanel selectionPanel = new JPanel(new BorderLayout(0, 15));
-        selectionPanel.setBackground(COLOR_BACKGROUND);
-        selectionPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel lblTitulo = new JLabel("📄 Seleccionar Contenido");
-        lblTitulo.setFont(FONT_CARD_TITLE);
-        lblTitulo.setForeground(COLOR_TEXT_PRIMARY);
-        selectionPanel.add(lblTitulo, BorderLayout.NORTH);
-
-        JPanel comboPanel = new JPanel(new BorderLayout(0, 10));
-        comboPanel.setBackground(COLOR_BACKGROUND);
-
-        JLabel lblSeleccion = new JLabel("Seleccione un contenido para valorar:");
-        lblSeleccion.setFont(FONT_CARD_DESC);
-        lblSeleccion.setForeground(COLOR_TEXT_SECONDARY);
-
-        JComboBox<String> comboContenidos = new JComboBox<>(titulos);
+        JComboBox<String> comboContenidos = new JComboBox<>(opciones);
         comboContenidos.setFont(FONT_CARD_DESC);
         comboContenidos.setBackground(COLOR_CARD);
-        comboContenidos.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 221, 225)),
-                BorderFactory.createEmptyBorder(8, 12, 8, 12)
-        ));
+        comboContenidos.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
 
-        comboPanel.add(lblSeleccion, BorderLayout.NORTH);
-        comboPanel.add(comboContenidos, BorderLayout.CENTER);
-        selectionPanel.add(comboPanel, BorderLayout.CENTER);
+        JPanel panel = new JPanel(new BorderLayout(0, 10));
+        panel.setBackground(COLOR_BACKGROUND);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.add(new JLabel("Seleccione un contenido para valorar:"), BorderLayout.NORTH);
+        panel.add(comboContenidos, BorderLayout.CENTER);
 
-        result = JOptionPane.showConfirmDialog(this, selectionPanel, "Seleccionar Contenido",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        int result = JOptionPane.showConfirmDialog(this, panel, "Seleccionar Contenido", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result != JOptionPane.OK_OPTION) return;
 
-        String seleccion = (String) comboContenidos.getSelectedItem();
-        Contenido seleccionado = null;
-        for (Contenido c : contenidos) {
-            if (c.getTitulo().equals(seleccion)) {
-                seleccionado = c;
-                break;
-            }
-        }
+        Contenido seleccionado = contenidos.get(comboContenidos.getSelectedIndex());
         if (seleccionado == null) return;
 
-        // Diálogo de valoración
+        // Panel de valoración
         JPanel ratingPanel = new JPanel(new BorderLayout(0, 15));
         ratingPanel.setBackground(COLOR_BACKGROUND);
         ratingPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -772,40 +700,32 @@ public class PanelModeradorView extends JFrame {
         tituloRating.setForeground(COLOR_TEXT_PRIMARY);
         ratingPanel.add(tituloRating, BorderLayout.NORTH);
 
-        // Panel de información del contenido
         JPanel infoPanel = new RoundedPanel(8);
         infoPanel.setBackground(new Color(248, 249, 250));
         infoPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         infoPanel.setLayout(new BorderLayout());
 
-        JLabel infoLabel = new JLabel("<html><b>Contenido:</b> " + seleccionado.getTitulo() + "<br><b>Tema:</b> " + seleccionado.getTema() + "</html>");
+        JLabel infoLabel = new JLabel("<html><b>Título:</b> " + seleccionado.getTitulo()
+                + "<br><b>Autor:</b> " + seleccionado.getAutor()
+                + "<br><b>Tema:</b> " + seleccionado.getTema() + "</html>");
         infoLabel.setFont(FONT_CARD_DESC);
         infoLabel.setForeground(COLOR_TEXT_PRIMARY);
-        infoPanel.add(infoLabel);
+        infoPanel.add(infoLabel, BorderLayout.CENTER);
 
         ratingPanel.add(infoPanel, BorderLayout.CENTER);
 
-        // Panel de calificación con estrellas visuales
-        JPanel scorePanel = new JPanel(new BorderLayout(0, 10));
-        scorePanel.setBackground(COLOR_BACKGROUND);
-
-        JLabel scoreLabel = new JLabel("Calificación (1-5 estrellas):");
-        scoreLabel.setFont(FONT_CARD_DESC);
-        scoreLabel.setForeground(COLOR_TEXT_SECONDARY);
-
-        // Panel de estrellas interactivas
-        JPanel starsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-        starsPanel.setBackground(COLOR_BACKGROUND);
-
+        // Sección de estrellas y campo
         JTextField txtValor = new JTextField(5);
         txtValor.setFont(FONT_CARD_DESC);
+        txtValor.setHorizontalAlignment(JTextField.CENTER);
         txtValor.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(220, 221, 225)),
                 BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
-        txtValor.setHorizontalAlignment(JTextField.CENTER);
 
-        // Agregar estrellas visuales
+        JPanel starsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+        starsPanel.setBackground(COLOR_BACKGROUND);
+
         JLabel[] stars = new JLabel[5];
         for (int i = 0; i < 5; i++) {
             stars[i] = new JLabel("☆");
@@ -830,18 +750,19 @@ public class PanelModeradorView extends JFrame {
             starsPanel.add(stars[i]);
         }
 
-        // Panel combinado
-        JPanel inputPanel = new JPanel(new BorderLayout(10, 0));
-        inputPanel.setBackground(COLOR_BACKGROUND);
-        inputPanel.add(starsPanel, BorderLayout.CENTER);
-        inputPanel.add(txtValor, BorderLayout.EAST);
+        JPanel scorePanel = new JPanel(new BorderLayout(10, 0));
+        scorePanel.setBackground(COLOR_BACKGROUND);
+        scorePanel.add(starsPanel, BorderLayout.CENTER);
+        scorePanel.add(txtValor, BorderLayout.EAST);
 
-        scorePanel.add(scoreLabel, BorderLayout.NORTH);
-        scorePanel.add(inputPanel, BorderLayout.CENTER);
-        ratingPanel.add(scorePanel, BorderLayout.SOUTH);
+        JPanel total = new JPanel(new BorderLayout(0, 10));
+        total.setBackground(COLOR_BACKGROUND);
+        total.add(new JLabel("Calificación (1-5 estrellas):"), BorderLayout.NORTH);
+        total.add(scorePanel, BorderLayout.CENTER);
 
-        result = JOptionPane.showConfirmDialog(this, ratingPanel, "Valorar Contenido",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        ratingPanel.add(total, BorderLayout.SOUTH);
+
+        result = JOptionPane.showConfirmDialog(this, ratingPanel, "Valorar Contenido", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result != JOptionPane.OK_OPTION) return;
 
         String valor = txtValor.getText().trim();
@@ -854,7 +775,6 @@ public class PanelModeradorView extends JFrame {
 
             seleccionado.agregarValoracion(calif);
 
-            // Diálogo de éxito con animación
             JPanel successPanel = new JPanel(new BorderLayout(0, 15));
             successPanel.setBackground(COLOR_BACKGROUND);
             successPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -863,7 +783,7 @@ public class PanelModeradorView extends JFrame {
             successIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 48));
             successIcon.setHorizontalAlignment(SwingConstants.CENTER);
 
-            JLabel successText = new JLabel("<html><center><b>¡Valoración Registrada!</b><br>Se ha asignado " + calif + " estrella" + (calif > 1 ? "s" : "") + " al contenido</center></html>");
+            JLabel successText = new JLabel("<html><center><b>¡Valoración Registrada!</b><br>Se asignaron " + calif + " estrella" + (calif > 1 ? "s" : "") + " al contenido</center></html>");
             successText.setFont(FONT_CARD_DESC);
             successText.setForeground(COLOR_TEXT_PRIMARY);
             successText.setHorizontalAlignment(SwingConstants.CENTER);
@@ -877,6 +797,7 @@ public class PanelModeradorView extends JFrame {
             showModernDialog("Ingrese un número válido para la valoración", "Formato Inválido", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     // Métodos auxiliares para las estrellas interactivas
     private void updateStars(JLabel[] stars, int rating) {
