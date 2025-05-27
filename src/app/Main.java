@@ -6,7 +6,7 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        // 🔥 Cargar datos quemados
+        //  Cargar datos quemados
         DatosPrueba.cargar(
                 AppContext.usuarioController,
                 AppContext.contenidoController,

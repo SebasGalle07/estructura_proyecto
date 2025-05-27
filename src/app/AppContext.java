@@ -24,10 +24,10 @@ public class AppContext {
 
  public static void cargarDatosPrueba(boolean conectarTodos) {
   // Usuarios con intereses variados
-  registrar("1", "Kevin", intereses("Matemáticas", "Física"));
+  registrar("1", "Sebastian", intereses("Matemáticas", "Física"));
   registrar("2", "Luis", intereses("Física", "Programación"));
-  registrar("3", "Ana", intereses("Programación", "Diseño"));
-  registrar("4", "Carlos", intereses("Historia", "Diseño"));
+  registrar("3", "Lisa", intereses("Programación", "Diseño"));
+  registrar("4", "Juan", intereses("Historia", "Diseño"));
   registrar("5", "Santiago", intereses("Historia", "Matemáticas"));
   registrar("moderador", "Moderador", intereses());
 
