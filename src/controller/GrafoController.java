@@ -30,4 +30,9 @@ public class GrafoController {
     public GrafoAfinidad getGrafo() {
         return grafo;
     }
+
+    public ListaEnlazada<ListaEnlazada<Usuario>> detectarClusters() {
+        return grafo.detectarClusters();
+    }
 }
+

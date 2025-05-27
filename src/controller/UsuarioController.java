@@ -1,5 +1,6 @@
 package controller;
 
+import app.AppContext;
 import model.Usuario;
 import model.ListaEnlazada;
 import model.Pair;
@@ -15,8 +16,11 @@ public class UsuarioController {
         if (buscarUsuario(id) != null) return false;
         Usuario nuevo = new Usuario(id, nombre, intereses);
         usuarios.insertarFinal(new Pair<>(id, nuevo));
+        AppContext.grafoController.agregarUsuario(nuevo);
+
         return true;
     }
+
 
     public Usuario buscarUsuario(String id) {
         for (Pair<String, Usuario> par : usuarios) {
