@@ -630,7 +630,7 @@ public class PanelModeradorView extends JFrame {
         textArea.setFont(new Font("JetBrains Mono", Font.PLAIN, 13));
         textArea.setEditable(false);
         textArea.setBackground(new Color(248, 249, 250));
-        textArea.setForeground(COLOR_TEXT_PRIMARY);
+        textArea.setForeground(Color.BLACK);
         textArea.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         StringBuilder sb = new StringBuilder();

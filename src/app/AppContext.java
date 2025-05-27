@@ -19,7 +19,7 @@ public class AppContext {
 
  static {
   // Cambia a false si quieres usar solo conexiones reales (por afinidad)
-  cargarDatosPrueba(true);
+  cargarDatosPrueba(false);
  }
 
  public static void cargarDatosPrueba(boolean conectarTodos) {
