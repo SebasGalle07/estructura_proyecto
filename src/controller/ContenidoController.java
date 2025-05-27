@@ -4,6 +4,8 @@ import model.ArbolBinarioBusqueda;
 import model.Contenido;
 import model.Usuario;
 import model.ListaEnlazada;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContenidoController {
     private ArbolBinarioBusqueda<Contenido> arbol;
@@ -32,38 +34,51 @@ public class ContenidoController {
         return arbol.inOrden(); 
     }
 
-    public ListaEnlazada<Contenido> buscarPorTema(String tema) {
-        ListaEnlazada<Contenido> resultado = new ListaEnlazada<>();
-        ListaEnlazada<Contenido> todos = arbol.inOrden();
-        for (Contenido c : todos) {
-            if (c.getTema().equalsIgnoreCase(tema)) {
-                resultado.insertarFinal(c);
+    public List<Contenido> buscarPorTema(String tema) {
+        List<Contenido> resultado = new ArrayList<>();
+        ListaEnlazada<Contenido> listaEnlazada = arbol.inOrden(); // Obtener todos los contenidos en orden
+        List<Contenido> todos = new ArrayList<>();
+        for (Contenido contenido : listaEnlazada) {
+            todos.add(contenido);
+        }
+        for (Contenido contenido : todos) {
+            if (contenido.getTema().equalsIgnoreCase(tema)) {
+                resultado.add(contenido);
             }
         }
         return resultado;
     }
 
-    public ListaEnlazada<Contenido> buscarPorAutor(String autor) {
-        ListaEnlazada<Contenido> resultado = new ListaEnlazada<>();
-        ListaEnlazada<Contenido> todos = arbol.inOrden();
-        for (Contenido c : todos) {
-            if (c.getAutor().equalsIgnoreCase(autor)) {
-                resultado.insertarFinal(c);
+    public List<Contenido> buscarPorAutor(String autor) {
+        List<Contenido> resultado = new ArrayList<>();
+        ListaEnlazada<Contenido> listaEnlazada = arbol.inOrden(); // Obtener todos los contenidos en orden
+        List<Contenido> todos = new ArrayList<>();
+        for (Contenido contenido : listaEnlazada) {
+            todos.add(contenido);
+        }
+        for (Contenido contenido : todos) {
+            if (contenido.getAutor().equalsIgnoreCase(autor)) {
+                resultado.add(contenido);
             }
         }
         return resultado;
     }
 
-    public ListaEnlazada<Contenido> buscarPorTipo(String tipo) {
-        ListaEnlazada<Contenido> resultado = new ListaEnlazada<>();
-        ListaEnlazada<Contenido> todos = arbol.inOrden();
-        for (Contenido c : todos) {
-            if (c.getTipo().equalsIgnoreCase(tipo)) {
-                resultado.insertarFinal(c);
+    public List<Contenido> buscarPorTipo(String tipo) {
+        List<Contenido> resultado = new ArrayList<>();
+        ListaEnlazada<Contenido> listaEnlazada = arbol.inOrden(); // Obtener todos los contenidos en orden
+        List<Contenido> todos = new ArrayList<>();
+        for (Contenido contenido : listaEnlazada) {
+            todos.add(contenido);
+        }
+        for (Contenido contenido : todos) {
+            if (contenido.getTipo().equalsIgnoreCase(tipo)) {
+                resultado.add(contenido);
             }
         }
         return resultado;
     }
+
     public Contenido buscarContenidoPorId(int idContenido) {
         ListaEnlazada<Contenido> todos = arbol.inOrden(); 
         for (Contenido contenido : todos) {
@@ -73,6 +88,7 @@ public class ContenidoController {
         }
         return null; 
     }
+
     public void valorarContenido(String idContenido, int valoracion, Usuario usuario) {
         Contenido contenido = buscarContenidoPorId(Integer.parseInt(idContenido));
         if (contenido != null) {
